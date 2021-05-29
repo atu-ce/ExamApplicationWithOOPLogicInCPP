@@ -1,0 +1,4 @@
+Dogru Cevaplariniz:
+Yanlis Cevaplariniz:
+1. soru (asd), dogru cevap: python.
+
