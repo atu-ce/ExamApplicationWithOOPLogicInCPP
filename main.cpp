@@ -284,88 +284,27 @@ protected:
 class Users : public People
 {
 private:
-    int password, passwordAgain, passwordForTeacherByClass;
+    int passwordForTeacherByClass;
 
 protected:
-    string username, title, role;
+    int password, passwordAgain;
+    string username, role;
 
 public:
+    string title;
     Users()
     {
         passwordForTeacherByClass = 112233;
     }
 
-    // Kullanıcıdan isim-soyisim istenir ve gelen değer ile klasör oluşturulur.
-    bool signUp()
+    int getPasswordForTeacher()
     {
-        cout << "Yapabileceginiz unvan tercihleri: ogretmen/teacher/t veya ogrenci/student/s" << endl;
+        return passwordForTeacherByClass;
+    }
 
-        while (true)
-        {
-            cout << "Unvaniniz: ";
-            cin >> title;
-            title = trim(title);
-            title = toLowercase(title);
-
-            if (title == "ogretmen" || title == "teacher" || title == "t")
-            {
-                int passwordForTeacherByUser;
-                cout << "Ogretmenlik unvanini secebilmeniz icin sistemin size verdigi sifreyi girmeniz gerekmektedir.\nSifre: ";
-                cin >> passwordForTeacherByUser;
-
-                string result = passwordCheck(passwordForTeacherByClass, passwordForTeacherByUser);
-                if (result == "failed")
-                {
-                    cout << "Cok fazla hatali giris yaptiniz! Guncel sifreye sahip oldugunuzdan emin olunuz." << endl;
-                    return false;
-                }
-                cout << "Sifre dogru, ogretmenlik unvaninda kullanici olusturabilirsiniz." << endl;
-                cout << "Bransiniz: ";
-                // BURDA KALDIN!
-                break;
-            }
-            else if (title == "ogrenci" || title == "student" || title == "s")
-                break;
-            else
-                cout << "Yanlis deger girdiniz! Lutfen tekrar deneyiniz." << endl;
-        }
-
-        cout << "Adiniz: ";
-        getline(cin, name);
-        name = trim(name);
-        name = toLowercase(name);
-
-        cout << "SoyAdiniz: ";
-        getline(cin, surname);
-        surname = trim(surname);
-        surname = toLowercase(surname);
-
-        cout << "Cinsiyetiniz: ";
-        cin >> gender;
-        gender = trim(gender);
-        gender = toLowercase(gender);
-
-        cout << "Yasiniz: ";
-        cin >> age;
-
-        cout << "Talep ettiginiz kullanici adi: ";
-        cin >> username;
-        username = trim(username);
-        username = toLowercase(username);
-
-        cout << "Parola: ";
-        cin >> password;
-
-        cout << "Parola tekrar: ";
-        cin >> passwordAgain;
-
-        string loginStatus = passwordCheck(password, passwordAgain);
-        if (loginStatus == "failed")
-        {
-            cout << "Hatali parola girislerinden dolayi '" << username << "' kullanicisi olusturulamadi! Lutfen tekrar deneyiniz." << endl;
-            return false;
-        }
-
+    // Ana sınıfın signUp() fonksiyonudur kaydolma işlemleri türetilmiş sınıflarda yapılacaktır.
+    virtual bool signUp()
+    {
         string way = get_current_dir();
         string usersWay = way + "/users";
 
@@ -376,44 +315,6 @@ public:
             int status = mkdir(usersWay.c_str(), 0777);
         }
 
-        string path = usersWay + "/" + username;
-
-        try
-        {
-            int status = mkdir(path.c_str(), 0777);
-            if (status == -1)
-            {
-                throw;
-            }
-            else
-            {
-                cout << "'" << username << "' kullanicisi basariyla olusturuldu. Sisteme giris yaparak islemlerinizi gerceklestirebilirsiniz." << endl;
-
-                string userProfileWay = path + "/profile.txt";
-                ofstream userProfile(userProfileWay);
-                userProfile << "Isim: " << name << endl;
-                userProfile << "Soyisim: " << surname << endl;
-                userProfile << "Cinsiyet: " << gender << endl;
-                userProfile << "Yas: " << age << endl;
-                userProfile << "Kullanici adi: " << username << endl;
-                userProfile << "Parola: " << password << endl;
-                userProfile.close();
-
-                string loginInquiryWay = way + "/loginInquiry.txt";
-                ofstream loginInquiryFile;
-                loginInquiryFile.open(loginInquiryWay, ios_base::app);
-                loginInquiryFile << username << endl;
-                loginInquiryFile.close();
-
-                userCreated();
-                return true;
-            }
-        }
-        catch (const exception &e)
-        {
-            cerr << "'" << username << "' kullanicisi '" << e.what() << "' nedeninden dolayi olusturulamadi! Lutfen tekrar deneyiniz." << endl;
-            registrationFailed();
-        }
         return false;
     }
 
@@ -498,18 +399,291 @@ public:
     string courseName;
     int currentClass, totalExams, finishedExams;
     friend string isPassed(Lessons lessons);
+
+    Lessons(string comCourseName, int comCurrentClass, int comTotalExams, int comFinishedExams)
+    {
+        courseName = comCourseName;
+        currentClass = comCurrentClass;
+        totalExams = comTotalExams;
+        finishedExams = comFinishedExams;
+    }
+    Lessons(string comCourseName, int comCurrentClass, int comTotalExams)
+    {
+        courseName = comCourseName;
+        currentClass = comCurrentClass;
+        totalExams = comTotalExams;
+        finishedExams = 0;
+    }
+    Lessons(string comCourseName, int comCurrentClass)
+    {
+        courseName = comCourseName;
+        currentClass = comCurrentClass;
+        totalExams = 2;
+        finishedExams = 0;
+    }
 };
+
+vector<Lessons> createLessonObjects(int whichGrader, string role);
 
 class Students : public Users
 {
 protected:
-    string whichGrader;
+    int whichGrader;
     int totalLessons;
     vector<Lessons> lessons;
+
+public:
+    // Kullanıcıdan gerekli bilgiler istenir, gelen değer ile kullanıcı oluşturulur ve bilgiler profile.txt dosyasına kaydedilir.
+    bool signUp()
+    {
+        cout << "Sistemimiz asagida listelenmis bolumleri kapsamaktadir," << endl;
+        cout << "1.) Bilgisayar Muhendisligi\n2.) Makine Muhendisligi" << endl;
+        int branch;
+        while (true)
+        {
+            cout << "Lutfen bolumunuzu seciniz: ";
+            cin >> branch;
+            if (branch == 1)
+            {
+                role = "BM";
+                break;
+            }
+            else if (branch == 2)
+            {
+                role = "MM";
+                break;
+            }
+            else
+                cout << "Yanlis deger girdiniz! Lutfen tekrar deneyiniz." << endl;
+        }
+
+        while (true)
+        {
+            cout << "Kacinci sinifsiniz: ";
+            cin >> whichGrader;
+            if (whichGrader == 1 || whichGrader == 2 || whichGrader == 3 || whichGrader == 4)
+                break;
+            else
+                cout << "Yanlis deger girdiniz! Lutfen tekrar deneyiniz." << endl;
+        }
+
+        lessons = createLessonObjects(whichGrader, role);
+        totalLessons = lessons.size();
+
+        cout << "Adiniz: ";
+        getline(cin, name);
+        name = trim(name);
+        name = toLowercase(name);
+
+        cout << "SoyAdiniz: ";
+        getline(cin, surname);
+        surname = trim(surname);
+        surname = toLowercase(surname);
+
+        cout << "Cinsiyetiniz: ";
+        cin >> gender;
+        gender = trim(gender);
+        gender = toLowercase(gender);
+
+        cout << "Yasiniz: ";
+        cin >> age;
+
+        cout << "Talep ettiginiz kullanici adi: ";
+        cin >> username;
+        username = trim(username);
+        username = toLowercase(username);
+
+        cout << "Parola: ";
+        cin >> password;
+
+        cout << "Parola tekrar: ";
+        cin >> passwordAgain;
+
+        string loginStatus = passwordCheck(password, passwordAgain);
+        if (loginStatus == "failed")
+        {
+            cout << "Hatali parola girislerinden dolayi '" << username << "' kullanicisi olusturulamadi! Lutfen tekrar deneyiniz." << endl;
+            return false;
+        }
+
+        string way = get_current_dir();
+        string usersWay = way + "/users";
+
+        bool isUsersFolder = IsPathExist(usersWay);
+
+        if (!isUsersFolder)
+        {
+            int status = mkdir(usersWay.c_str(), 0777);
+        }
+
+        string path = usersWay + "/" + username;
+
+        try
+        {
+            int status = mkdir(path.c_str(), 0777);
+            if (status == -1)
+            {
+                throw;
+            }
+            else
+            {
+                cout << "'" << username << "' kullanicisi basariyla olusturuldu. Sisteme giris yaparak islemlerinizi gerceklestirebilirsiniz." << endl;
+
+                string userProfileWay = path + "/profile.txt";
+                ofstream userProfile(userProfileWay);
+                userProfile << "Isim: " << name << endl;
+                userProfile << "Soyisim: " << surname << endl;
+                userProfile << "Cinsiyet: " << gender << endl;
+                userProfile << "Yas: " << age << endl;
+                userProfile << "Unvaniniz: " << role << endl;
+                userProfile << "Kullanici adi: " << username << endl;
+                userProfile << "Parola: " << password << endl;
+                userProfile.close();
+
+                string loginInquiryWay = way + "/loginInquiry.txt";
+                ofstream loginInquiryFile;
+                loginInquiryFile.open(loginInquiryWay, ios_base::app);
+                loginInquiryFile << username << endl;
+                loginInquiryFile.close();
+
+                userCreated();
+                return true;
+            }
+        }
+        catch (const exception &e)
+        {
+            cerr << "'" << username << "' kullanicisi '" << e.what() << "' nedeninden dolayi olusturulamadi! Lutfen tekrar deneyiniz." << endl;
+            registrationFailed();
+        }
+        return false;
+    }
 };
 
 class Teachers : public Users
 {
+public:
+    // Kullanıcıdan gerekli bilgiler istenir, gelen değer ile kullanıcı oluşturulur ve bilgiler profile.txt dosyasına kaydedilir.
+    virtual bool signUp()
+    {
+        cout << "Sistemimiz asagida listelenmis branslari kapsamaktadir," << endl;
+        cout << "1.) Matematik\n2.) Fizik\n3.) Bilgisayar Bolumu Ogretmeni\n4.) Makine Bolumu Ogretmeni" << endl;
+        int branch;
+        while (true)
+        {
+            cout << "Lutfen bransinizi seciniz: ";
+            cin >> branch;
+            if (branch == 1)
+            {
+                role = "Matematik";
+                break;
+            }
+            else if (branch == 2)
+            {
+                role = "Fizik";
+                break;
+            }
+            else if (branch == 3)
+            {
+                role = "Bilgisayar Bolumu";
+                break;
+            }
+            else if (branch == 4)
+            {
+                role = "Makine Bolumu";
+                break;
+            }
+            else
+                cout << "Yanlis deger girdiniz! Lutfen tekrar deneyiniz." << endl;
+        }
+
+        cout << "Adiniz: ";
+        getline(cin, name);
+        name = trim(name);
+        name = toLowercase(name);
+
+        cout << "SoyAdiniz: ";
+        getline(cin, surname);
+        surname = trim(surname);
+        surname = toLowercase(surname);
+
+        cout << "Cinsiyetiniz: ";
+        cin >> gender;
+        gender = trim(gender);
+        gender = toLowercase(gender);
+
+        cout << "Yasiniz: ";
+        cin >> age;
+
+        cout << "Talep ettiginiz kullanici adi: ";
+        cin >> username;
+        username = trim(username);
+        username = toLowercase(username);
+
+        cout << "Parola: ";
+        cin >> password;
+
+        cout << "Parola tekrar: ";
+        cin >> passwordAgain;
+
+        string loginStatus = passwordCheck(password, passwordAgain);
+        if (loginStatus == "failed")
+        {
+            cout << "Hatali parola girislerinden dolayi '" << username << "' kullanicisi olusturulamadi! Lutfen tekrar deneyiniz." << endl;
+            return false;
+        }
+
+        string way = get_current_dir();
+        string usersWay = way + "/users";
+
+        bool isUsersFolder = IsPathExist(usersWay);
+
+        if (!isUsersFolder)
+        {
+            int status = mkdir(usersWay.c_str(), 0777);
+        }
+
+        string path = usersWay + "/" + username;
+
+        try
+        {
+            int status = mkdir(path.c_str(), 0777);
+            if (status == -1)
+            {
+                throw;
+            }
+            else
+            {
+                cout << "'" << username << "' kullanicisi basariyla olusturuldu. Sisteme giris yaparak islemlerinizi gerceklestirebilirsiniz." << endl;
+
+                string userProfileWay = path + "/profile.txt";
+                ofstream userProfile(userProfileWay);
+                userProfile << "Isim: " << name << endl;
+                userProfile << "Soyisim: " << surname << endl;
+                userProfile << "Cinsiyet: " << gender << endl;
+                userProfile << "Yas: " << age << endl;
+                userProfile << "Unvan: " << role << endl;
+                userProfile << "Brans: " << role << endl;
+                userProfile << "Kullanici adi: " << username << endl;
+                userProfile << "Parola: " << password << endl;
+                userProfile.close();
+
+                string loginInquiryWay = way + "/loginInquiry.txt";
+                ofstream loginInquiryFile;
+                loginInquiryFile.open(loginInquiryWay, ios_base::app);
+                loginInquiryFile << username << endl;
+                loginInquiryFile.close();
+
+                userCreated();
+                return true;
+            }
+        }
+        catch (const exception &e)
+        {
+            cerr << "'" << username << "' kullanicisi '" << e.what() << "' nedeninden dolayi olusturulamadi! Lutfen tekrar deneyiniz." << endl;
+            registrationFailed();
+        }
+        return false;
+    }
 };
 
 string isPassed(Lessons lessons)
@@ -524,18 +698,19 @@ string isPassed(Lessons lessons)
 }
 
 // Parametre olarak verilen sınıf numarasına göre o sınıfın derslerini döndüren fonksiyon.
-vector<string> findLessons(int whichGrader)
+vector<string> findLessons(int whichGrader, string role)
 {
     int counter = 0;
     vector<string> lessons;
-    string way = get_current_dir();
-    string allLessonsWay = way + "/allLessons.txt";
+
+    string way = get_current_dir() + "/allLessons/";
+    string departmentLessonsWay = way + role + "Lessons.txt";
 
     string fileContent;
     string delimiter = ">>>-----<<<";
-    ifstream readAllLessonsFile(allLessonsWay);
+    ifstream readLessonsFile(departmentLessonsWay);
 
-    while (getline(readAllLessonsFile, fileContent))
+    while (getline(readLessonsFile, fileContent))
     {
         if (counter == whichGrader)
             break;
@@ -548,9 +723,22 @@ vector<string> findLessons(int whichGrader)
         else if (counter == whichGrader - 1)
             lessons.push_back(fileContent);
     }
-    readAllLessonsFile.close();
+    readLessonsFile.close();
 
     return lessons;
+}
+
+vector<Lessons> createLessonObjects(int whichGrader, string role)
+{
+    vector<string> lessons = findLessons(whichGrader, role);
+    int lessonsSize = lessons.size();
+    vector<Lessons> lessonObjects;
+    for (string lesson : lessons)
+    {
+        Lessons lessonObject = Lessons(lesson, whichGrader);
+        lessonObjects.push_back(lessonObject);
+    }
+    return lessonObjects;
 }
 
 // 1'e basıldığında bu fonksiyon çalışır. Yeni soru ekler.
@@ -641,9 +829,48 @@ void createMenu()
 
                 if (userPreference == 1)
                 {
-                    bool isRegistered = Users().signUp();
-                    if (isRegistered)
-                        break;
+                    string authority;
+                    cout << "Yapabileceginiz unvan tercihleri: ogretmen/teacher/t veya ogrenci/student/s" << endl;
+                    while (true)
+                    {
+                        cout << "Unvaniniz: ";
+                        cin >> authority;
+                        authority = trim(authority);
+                        authority = toLowercase(authority);
+
+                        if (authority == "ogretmen" || authority == "teacher" || authority == "t")
+                        {
+                            int passwordForTeacherByUser;
+                            Teachers userTeacher;
+                            cout << "Ogretmenlik unvanini secebilmeniz icin sistemin size verdigi sifreyi girmeniz gerekmektedir.\nSifre: ";
+                            cin >> passwordForTeacherByUser;
+
+                            string result = passwordCheck(userTeacher.getPasswordForTeacher(), passwordForTeacherByUser);
+                            if (result == "failed")
+                            {
+                                cout << "Cok fazla hatali giris yaptiniz! Guncel sifreye sahip oldugunuzdan emin olunuz." << endl;
+                                break;
+                            }
+                            cout << "Sifre dogru, ogretmenlik unvaninda kullanici olusturabilirsiniz." << endl;
+                            userTeacher.title = "ogretmen";
+                            bool isRegistered = userTeacher.signUp();
+                            if (isRegistered)
+                                break;
+                            cout << "Kullanici olusturma asamasinda bir hata olustu! Lutfen tekrar deneyiniz." << endl;
+                        }
+                        else if (authority == "ogrenci" || authority == "student" || authority == "s")
+                        {
+                            Students userStudent;
+                            userStudent.title = "ogrenci";
+                            bool isRegistered = userStudent.signUp();
+                            if (isRegistered)
+                                break;
+                            cout << "Kullanici olusturma asamasinda bir hata olustu! Lutfen tekrar deneyiniz." << endl;
+                        }
+                        else
+                            cout << "Yanlis deger girdiniz! Lutfen tekrar deneyiniz." << endl;
+                    }
+                    break;
                 }
                 else if (userPreference == 2)
                 {
@@ -674,6 +901,17 @@ void createMenu()
 
 int main()
 {
+    // vector<string> bmLessons=findLessons(4,"BM");
+    // vector<string> mmLessons=findLessons(3,"MM");
+    // for (int i = 0; i < bmLessons.size(); i++)
+    // {
+    //     cout<<bmLessons[i]<<endl;
+    // }
+    // printf("\n");
+    // for (int j = 0; j < mmLessons.size(); j++)
+    // {
+    //     cout<<mmLessons[j]<<endl;
+    // }
     cout << string(50, '*') << " Sinav Uygulamasi " << string(50, '*') << endl;
     createMenu();
     return 0;
