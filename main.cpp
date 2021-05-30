@@ -302,7 +302,7 @@ public:
         return passwordForTeacherByClass;
     }
 
-    // Ana sınıfın signUp() fonksiyonudur kaydolma işlemleri türetilmiş sınıflarda yapılacaktır.
+    // Ana sınıfın signUp() fonksiyonudur kaydolma işlemleri türetilmiş sınıfların signUp() fonksiyonunda yapılacaktır.
     virtual bool signUp()
     {
         string way = get_current_dir();
@@ -531,13 +531,21 @@ public:
 
                 string userProfileWay = path + "/profile.txt";
                 ofstream userProfile(userProfileWay);
+                userProfile << "Kullanici Adi: " << username << endl;
+                userProfile << "Parola: " << password << endl;
                 userProfile << "Isim: " << name << endl;
                 userProfile << "Soyisim: " << surname << endl;
                 userProfile << "Cinsiyet: " << gender << endl;
                 userProfile << "Yas: " << age << endl;
-                userProfile << "Unvaniniz: " << role << endl;
-                userProfile << "Kullanici adi: " << username << endl;
-                userProfile << "Parola: " << password << endl;
+                userProfile << "Unvan: " << title << endl;
+                userProfile << "Bolum: " << role << endl;
+                userProfile << "Sinif: " << whichGrader << ". Sinif" << endl;
+                userProfile << "Toplam Ders Sayisi: " << totalLessons << endl;
+                userProfile << "Dersleri: ";
+                for (int i = 0; i < lessons.size(); i++)
+                {
+                    userProfile << lessons[i].courseName << ", ";
+                }
                 userProfile.close();
 
                 string loginInquiryWay = way + "/loginInquiry.txt";
@@ -657,14 +665,14 @@ public:
 
                 string userProfileWay = path + "/profile.txt";
                 ofstream userProfile(userProfileWay);
+                userProfile << "Kullanici Adi: " << username << endl;
+                userProfile << "Parola: " << password << endl;
                 userProfile << "Isim: " << name << endl;
                 userProfile << "Soyisim: " << surname << endl;
                 userProfile << "Cinsiyet: " << gender << endl;
                 userProfile << "Yas: " << age << endl;
                 userProfile << "Unvan: " << role << endl;
                 userProfile << "Brans: " << role << endl;
-                userProfile << "Kullanici adi: " << username << endl;
-                userProfile << "Parola: " << password << endl;
                 userProfile.close();
 
                 string loginInquiryWay = way + "/loginInquiry.txt";
@@ -802,22 +810,83 @@ void createMenu()
         {
             string access;
             int password;
+            bool isUser = false;
             // Soru eklemeyi sadece öğretmenlerin yapabilmesi için gerekli kod dizini.
             cout << "Kullanici adi: ";
             cin >> access;
             access = trim(access);
             access = toLowercase(access);
 
+            string way = get_current_dir();
+            string loginInquiryWay = way + "/loginInquiry.txt";
+
+            bool isloginInquiryFile = IsPathExist(loginInquiryWay);
+
+            if (!isloginInquiryFile)
+            {
+                ofstream loginInquiryFile(loginInquiryWay);
+                loginInquiryFile.close();
+            }
+
+            string fileContent;
+            ifstream readLoginInquiryFile(loginInquiryWay);
+
+            while (getline(readLoginInquiryFile, fileContent))
+            {
+                if (access == fileContent)
+                {
+                    isUser = true;
+                    break;
+                }
+            }
+            readLoginInquiryFile.close();
+            if (!isUser)
+            {
+                cout << "Girmis oldugunuz '" << access << "' adli kullanici sisteme kayitli degildir! Kullanici adinizdan emin olunuz." << endl;
+                continue;
+            }
+
+            string userProfileWay = way + "/users/" + access + "/profile.txt";
+
+            string profileContent;
+            ifstream readUserProfile(userProfileWay);
+            string delimiter = ": ";
+            bool isTeacher = false;
+            int passwordByDataBase;
+
+            while (getline(readUserProfile, profileContent))
+            {
+                string token = profileContent.substr(0, profileContent.find(delimiter));
+                if (token == "Parola")
+                {
+                    profileContent.erase(0, profileContent.find(delimiter) + delimiter.length());
+                    passwordByDataBase = profileContent;
+                    continue;
+                }
+                if (token == "Unvan")
+                {
+                    profileContent.erase(0, profileContent.find(delimiter) + delimiter.length());
+                    if (profileContent == "Ogretmen")
+                        isTeacher = true;
+                    break;
+                }
+            }
+            if (!isTeacher)
+            {
+                cout << "Soru ekleme yetkiniz yok!" << endl;
+                continue;
+            }
+
             cout << "Parola: ";
             cin >> password;
 
-            // ERİŞİM YETKİSİ KONTROLÜ YAPILACAK!
-            if (access == "admin")
+            string checkPassword = passwordCheck(passwordByDataBase, password);
+            if (checkPassword == "failed")
             {
-                questionAppend();
+                cout << "Hatali parola girislerinden dolayi oturum acma islemi iptal edilmistir! Lutfen tekrar deneyiniz." << endl;
+                continue;
             }
-            else
-                cout << ">>> Soru ekleme yetkiniz yok! <<<" << endl;
+            questionAppend();
         }
         else if (selectedAction == 2)
         {
@@ -852,7 +921,7 @@ void createMenu()
                                 break;
                             }
                             cout << "Sifre dogru, ogretmenlik unvaninda kullanici olusturabilirsiniz." << endl;
-                            userTeacher.title = "ogretmen";
+                            userTeacher.title = "Ogretmen";
                             bool isRegistered = userTeacher.signUp();
                             if (isRegistered)
                                 break;
@@ -861,7 +930,7 @@ void createMenu()
                         else if (authority == "ogrenci" || authority == "student" || authority == "s")
                         {
                             Students userStudent;
-                            userStudent.title = "ogrenci";
+                            userStudent.title = "Ogrenci";
                             bool isRegistered = userStudent.signUp();
                             if (isRegistered)
                                 break;
@@ -901,17 +970,6 @@ void createMenu()
 
 int main()
 {
-    // vector<string> bmLessons=findLessons(4,"BM");
-    // vector<string> mmLessons=findLessons(3,"MM");
-    // for (int i = 0; i < bmLessons.size(); i++)
-    // {
-    //     cout<<bmLessons[i]<<endl;
-    // }
-    // printf("\n");
-    // for (int j = 0; j < mmLessons.size(); j++)
-    // {
-    //     cout<<mmLessons[j]<<endl;
-    // }
     cout << string(50, '*') << " Sinav Uygulamasi " << string(50, '*') << endl;
     createMenu();
     return 0;
