@@ -1,0 +1,5 @@
+Fizik 1
+Fizik 2
+Termodinamik 1
+Termodinamik 2
+Isi Transferi

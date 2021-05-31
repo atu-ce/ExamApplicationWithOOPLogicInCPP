@@ -1,0 +1,24 @@
+Bilgisayar Muhendisligine Giris
+Bilgisayar Programlamaya Giris
+Ayrik Matematik
+Nesne Yonelimli Programlama
+Programlama Dillerinin Prensipleri
+Bilgisayar Organizasyonu
+Veri Tabani Yonetim Sistemleri
+Mantik Devreleri
+Veri Yapilari Ve Algoritmalar
+Web Tabanli Programlama
+Veri Madenciligi
+Isletim Sistemleri
+Bilgisayar Aglari
+Algoritma Analizi Ve Tasarimi
+Yazilim Muhendisligi
+Gomulu Sistemler
+Dogal Dil İsleme
+Kablosuz Ve Hareketli Aglar
+Goruntu Isleme
+Derleyici Tasarimi
+Bilgisayar Ve Ag Guvenligi
+Oruntu Tanıma
+Yapay Zeka
+Makine Ogrenmesi

@@ -71,7 +71,7 @@ string passwordCheck(int firstPassword, int secondPassword)
     {
         while (true)
         {
-            if (counter == 3)
+            if (counter == 22)
             {
                 cout << "3 defa yanlis parola girdiniz!" << endl;
                 return "failed";
@@ -283,24 +283,12 @@ protected:
 
 class Users : public People
 {
-private:
-    int passwordForTeacherByClass;
-
 protected:
     int password, passwordAgain;
     string username, role;
 
 public:
     string title;
-    Users()
-    {
-        passwordForTeacherByClass = 112233;
-    }
-
-    int getPasswordForTeacher()
-    {
-        return passwordForTeacherByClass;
-    }
 
     // Ana sınıfın signUp() fonksiyonudur kaydolma işlemleri türetilmiş sınıfların signUp() fonksiyonunda yapılacaktır.
     virtual bool signUp()
@@ -438,17 +426,17 @@ public:
     {
         cout << "Sistemimiz asagida listelenmis bolumleri kapsamaktadir," << endl;
         cout << "1.) Bilgisayar Muhendisligi\n2.) Makine Muhendisligi" << endl;
-        int branch;
+        string branch;
         while (true)
         {
             cout << "Lutfen bolumunuzu seciniz: ";
             cin >> branch;
-            if (branch == 1)
+            if (branch == "1")
             {
                 role = "BM";
                 break;
             }
-            else if (branch == 2)
+            else if (branch == "2")
             {
                 role = "MM";
                 break;
@@ -470,6 +458,8 @@ public:
         lessons = createLessonObjects(whichGrader, role);
         totalLessons = lessons.size();
 
+        getline(cin, branch); // getline() fonksiyonunun bir bug'ından dolayı bu satır yazılmıştır.
+        cout << "\n";
         cout << "Adiniz: ";
         getline(cin, name);
         name = trim(name);
@@ -569,41 +559,55 @@ public:
 
 class Teachers : public Users
 {
+private:
+    int passwordForTeacherByClass;
+
 public:
+    Teachers()
+    {
+        passwordForTeacherByClass = 112233;
+    }
+
+    int getPasswordForTeacher()
+    {
+        return passwordForTeacherByClass;
+    }
+
     // Kullanıcıdan gerekli bilgiler istenir, gelen değer ile kullanıcı oluşturulur ve bilgiler profile.txt dosyasına kaydedilir.
     virtual bool signUp()
     {
         cout << "Sistemimiz asagida listelenmis branslari kapsamaktadir," << endl;
         cout << "1.) Matematik\n2.) Fizik\n3.) Bilgisayar Bolumu Ogretmeni\n4.) Makine Bolumu Ogretmeni" << endl;
-        int branch;
+        string branch;
         while (true)
         {
             cout << "Lutfen bransinizi seciniz: ";
             cin >> branch;
-            if (branch == 1)
+            if (branch == "1")
             {
                 role = "Matematik";
                 break;
             }
-            else if (branch == 2)
+            else if (branch == "2")
             {
                 role = "Fizik";
                 break;
             }
-            else if (branch == 3)
+            else if (branch == "3")
             {
-                role = "Bilgisayar Bolumu";
+                role = "Bilgisayar";
                 break;
             }
-            else if (branch == 4)
+            else if (branch == "4")
             {
-                role = "Makine Bolumu";
+                role = "Makine";
                 break;
             }
             else
                 cout << "Yanlis deger girdiniz! Lutfen tekrar deneyiniz." << endl;
         }
-
+        getline(cin, branch); // getline() fonksiyonunun bir bug'ından dolayı bu satır yazılmıştır.
+        cout << "\n";
         cout << "Adiniz: ";
         getline(cin, name);
         name = trim(name);
@@ -671,7 +675,7 @@ public:
                 userProfile << "Soyisim: " << surname << endl;
                 userProfile << "Cinsiyet: " << gender << endl;
                 userProfile << "Yas: " << age << endl;
-                userProfile << "Unvan: " << role << endl;
+                userProfile << "Unvan: " << title << endl;
                 userProfile << "Brans: " << role << endl;
                 userProfile.close();
 
@@ -706,13 +710,13 @@ string isPassed(Lessons lessons)
 }
 
 // Parametre olarak verilen sınıf numarasına göre o sınıfın derslerini döndüren fonksiyon.
-vector<string> findLessons(int whichGrader, string role)
+vector<string> findLessons(int whichGrader, string branch)
 {
     int counter = 0;
     vector<string> lessons;
 
     string way = get_current_dir() + "/allLessons/";
-    string departmentLessonsWay = way + role + "Lessons.txt";
+    string departmentLessonsWay = way + branch + "Lessons.txt";
 
     string fileContent;
     string delimiter = ">>>-----<<<";
@@ -736,6 +740,32 @@ vector<string> findLessons(int whichGrader, string role)
     return lessons;
 }
 
+vector<string> findLessons(string branch)
+{
+    vector<string> lessons;
+
+    string way = get_current_dir() + "/allLessons/branches/";
+    string branchLessonsWay = way + branch + "Lessons.txt";
+
+    string fileContent;
+    ifstream readLessonsFile(branchLessonsWay);
+
+    while (getline(readLessonsFile, fileContent))
+    {
+        int counter = 0;
+        for (int i = 0; i < lessons.size(); i++)
+        {
+            if (lessons[i] != fileContent)
+                counter++;
+        }
+        if (counter == lessons.size())
+            lessons.push_back(fileContent);
+    }
+    readLessonsFile.close();
+
+    return lessons;
+}
+
 vector<Lessons> createLessonObjects(int whichGrader, string role)
 {
     vector<string> lessons = findLessons(whichGrader, role);
@@ -750,7 +780,7 @@ vector<Lessons> createLessonObjects(int whichGrader, string role)
 }
 
 // 1'e basıldığında bu fonksiyon çalışır. Branşa göre yeni soru ekler.
-void questionAppend(string branch)
+void questionAppend(string branch, string course)
 {
     string question, answer;
     string way = get_current_dir();
@@ -769,6 +799,13 @@ void questionAppend(string branch)
         int status = mkdir(branchFolderWay.c_str(), 0777);
     }
 
+    string courseFolderWay = branchFolderWay + "/" + course;
+    bool isCourseFolder = isPathExist(courseFolderWay);
+    if (!isCourseFolder)
+    {
+        int status = mkdir(courseFolderWay.c_str(), 0777);
+    }
+
     cout << "Soru: ";
     getline(cin, question);
     question = trim(question);
@@ -779,7 +816,7 @@ void questionAppend(string branch)
     answer = trim(answer);
     answer = toLowercase(answer);
 
-    string questionsAndAnswersWay = branchFolderWay + "/questionsAndAnswers.txt";
+    string questionsAndAnswersWay = courseFolderWay + "/questionsAndAnswers.txt";
 
     ofstream questionsAndAnswersFile;
     questionsAndAnswersFile.open(questionsAndAnswersWay, ios_base::app);
@@ -788,7 +825,7 @@ void questionAppend(string branch)
 }
 
 // 2'ye basıldığında bu fonksiyon çalışır. Sınavı başlatır.
-void quizStart(string branch)
+void quizStart(string branch, string course)
 {
     vector<Questions> questions;
     string way = get_current_dir();
@@ -807,10 +844,15 @@ void quizStart(string branch)
         int status = mkdir(branchFolderWay.c_str(), 0777);
     }
 
-    string questionsAndAnswersWay = branchFolderWay + "/questionsAndAnswers.txt";
+    string courseFolderWay = branchFolderWay + "/" + course;
+    bool isCourseFolder = isPathExist(courseFolderWay);
+    if (!isCourseFolder)
+    {
+        int status = mkdir(courseFolderWay.c_str(), 0777);
+    }
 
+    string questionsAndAnswersWay = courseFolderWay + "/questionsAndAnswers.txt";
     bool isQuestionsAndAnswersFile = isPathExist(questionsAndAnswersWay);
-
     if (!isQuestionsAndAnswersFile)
     {
         ofstream loginInquiryFile(questionsAndAnswersWay);
@@ -832,7 +874,7 @@ void quizStart(string branch)
 
     if (questions.size() == 0)
     {
-        cout << "Secmis oldugunuz '" << branch << "' derse ait bir sinav bulunmamaktadir!" << endl;
+        cout << "Secmis oldugunuz '" << course << "' derse ait bir sinav bulunmamaktadir!" << endl;
     }
     else
     {
@@ -844,6 +886,24 @@ void quizStart(string branch)
 // Menünün oluşturulduğu bölüm
 void createMenu()
 {
+    /*
+        Menü Aşağıdaki gibi olmalı!
+        > Kayıt Ol
+            Bilgiler alınır tekrar ana menüye dönülür.
+        > Giriş Yap
+            Gİriş başarılı ise,
+            Öğretmen için;
+                > Soru Ekle
+                > Ders Başarı Raporunu Görüntüle
+                > Ana Menü
+                > Çıkış
+            Öğrenci için;
+            > Sınav Ol
+            > Sonuçları Gör
+            > Ana Menü
+            > Çıkış
+        > Çıkış
+    */
     int selectedAction;
     while (true)
     {
@@ -855,6 +915,7 @@ void createMenu()
             string access;
             int password;
             bool isUser = false;
+
             // Soru eklemeyi sadece öğretmenlerin yapabilmesi için gerekli kod dizini.
             cout << "Kullanici adi: ";
             cin >> access;
@@ -892,7 +953,7 @@ void createMenu()
 
             string userProfileWay = way + "/users/" + access + "/profile.txt";
 
-            string profileContent, branch;
+            string profileContent, branch, course;
             ifstream readUserProfile(userProfileWay);
             string delimiter = ": ";
             bool isTeacher = false;
@@ -937,7 +998,48 @@ void createMenu()
                 cout << "Hatali parola girislerinden dolayi oturum acma islemi iptal edilmistir! Lutfen tekrar deneyiniz." << endl;
                 continue;
             }
-            questionAppend(branch);
+
+            cout << "Asagida bransiniza uygun dersler listelenmistir.";
+
+            string way = get_current_dir();
+            string branchesWay = way + "/allLessons/branches/" + branch + "Lessons.txt";
+            string fileContent;
+            ifstream readBranchFile(branchesWay);
+            int counter = 0;
+            while (getline(readBranchFile, fileContent))
+            {
+                counter++;
+                cout << counter << ".) " << fileContent << endl;
+            }
+            readBranchFile.close();
+
+            int courseNumber;
+            while (true)
+            {
+                cout << "Sorusunu eklemek istediginiz dersin numarasini giriniz: ";
+                cin >> courseNumber;
+                if (courseNumber > counter || courseNumber <= 0)
+                {
+                    cout << "Yanlis deger girdiniz! Lutfen tekrar deneyiniz." << endl;
+                    continue;
+                }
+
+                int meter = 0;
+                fileContent = "";
+                while (getline(readBranchFile, fileContent))
+                {
+                    meter++;
+                    if (meter == courseNumber)
+                    {
+                        course = fileContent;
+                        break;
+                    }
+                }
+                readBranchFile.close();
+                break;
+            }
+
+            questionAppend(branch, course);
         }
         else if (selectedAction == 2)
         {
@@ -1030,7 +1132,7 @@ void createMenu()
                             cout << "Sinavi sadece 'Ogrenci' unvanina sahip kullanicilar olabilir!" << endl;
                             break;
                         }
-
+                        // NOW STAY
                         quizStart(branch);
                         break;
                     }

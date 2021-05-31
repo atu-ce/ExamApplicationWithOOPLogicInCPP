@@ -1,0 +1,37 @@
+1. Sinif Dersleri:
+Matematik 1
+Matematik 2
+Fizik 1
+Fizik 2
+Bilgisayar Muhendisligine Giris
+Bilgisayar Programlamaya Giris
+Ayrik Matematik
+Nesne Yonelimli Programlama
+>>>-----<<<
+2. Sinif Dersleri:
+Programlama Dillerinin Prensipleri
+Bilgisayar Organizasyonu
+Veri Tabani Yonetim Sistemleri
+Mantik Devreleri
+Veri Yapilari Ve Algoritmalar
+Diferansiyel Denklemler
+>>>-----<<<
+3. Sinif Dersleri:
+Web Tabanli Programlama
+Veri Madenciligi
+Isletim Sistemleri
+Bilgisayar Aglari
+Algoritma Analizi Ve Tasarimi
+Yazilim Muhendisligi
+Gomulu Sistemler
+>>>-----<<<
+4. Sinif Dersleri:
+Dogal Dil İsleme
+Kablosuz Ve Hareketli Aglar
+Goruntu Isleme
+Derleyici Tasarimi
+Bilgisayar Ve Ag Guvenligi
+Oruntu Tanıma
+Yapay Zeka
+Makine Ogrenmesi
+>>>-----<<<

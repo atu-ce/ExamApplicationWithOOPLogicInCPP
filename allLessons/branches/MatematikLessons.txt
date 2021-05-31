@@ -1,0 +1,4 @@
+Matematik 1
+Matematik 2
+Diferansiyel Denklemler
+Lineer Cebir
