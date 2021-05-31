@@ -788,11 +788,34 @@ void questionAppend(string branch)
 }
 
 // 2'ye basıldığında bu fonksiyon çalışır. Sınavı başlatır.
-void quizStart()
+void quizStart(string branch)
 {
     vector<Questions> questions;
     string way = get_current_dir();
-    string questionsAndAnswersWay = way + "/questionsAndAnswers.txt";
+
+    string allQuestionsFolderWay = way + "/allQuestionsAndAnswers";
+    bool isAllQuestionFolder = isPathExist(allQuestionsFolderWay);
+    if (!isAllQuestionFolder)
+    {
+        int status = mkdir(allQuestionsFolderWay.c_str(), 0777);
+    }
+
+    string branchFolderWay = allQuestionsFolderWay + "/" + branch;
+    bool isBranchFolder = isPathExist(branchFolderWay);
+    if (!isBranchFolder)
+    {
+        int status = mkdir(branchFolderWay.c_str(), 0777);
+    }
+
+    string questionsAndAnswersWay = branchFolderWay + "/questionsAndAnswers.txt";
+
+    bool isQuestionsAndAnswersFile = isPathExist(questionsAndAnswersWay);
+
+    if (!isQuestionsAndAnswersFile)
+    {
+        ofstream loginInquiryFile(questionsAndAnswersWay);
+        loginInquiryFile.close();
+    }
 
     string fileContent;
     string delimiter = ": ";
@@ -807,8 +830,15 @@ void quizStart()
 
     readQuestionsAndAnswersFile.close();
 
-    Quiz quiz(questions);
-    quiz.loadQuestion();
+    if (questions.size() == 0)
+    {
+        cout << "Secmis oldugunuz '" << branch << "' derse ait bir sinav bulunmamaktadir!" << endl;
+    }
+    else
+    {
+        Quiz quiz(questions);
+        quiz.loadQuestion();
+    }
 }
 
 // Menünün oluşturulduğu bölüm
@@ -891,6 +921,7 @@ void createMenu()
                     continue;
                 }
             }
+            readUserProfile.close();
             if (!isTeacher)
             {
                 cout << "Soru ekleme yetkiniz yok!" << endl;
@@ -964,18 +995,50 @@ void createMenu()
                 else if (userPreference == 2)
                 {
                     bool isLoggedIn = Users().signIn();
-                    if (isLoggedIn)
+                    if (!isLoggedIn)
                         break;
+                    if (isStarted)
+                    {
+                        string way = get_current_dir();
+                        string userProfileWay = way + "/users/" + globalUsername + "/profile.txt";
+
+                        string profileContent, branch;
+                        ifstream readUserProfile(userProfileWay);
+                        string delimiter = ": ";
+                        bool isStudent = false;
+
+                        while (getline(readUserProfile, profileContent))
+                        {
+                            string token = profileContent.substr(0, profileContent.find(delimiter));
+                            if (token == "Unvan")
+                            {
+                                profileContent.erase(0, profileContent.find(delimiter) + delimiter.length());
+                                if (profileContent == "Ogrenci")
+                                    isStudent = true;
+                                continue;
+                            }
+                            if (token == "Brans")
+                            {
+                                profileContent.erase(0, profileContent.find(delimiter) + delimiter.length());
+                                branch = profileContent;
+                                continue;
+                            }
+                        }
+                        readUserProfile.close();
+                        if (!isStudent)
+                        {
+                            cout << "Sinavi sadece 'Ogrenci' unvanina sahip kullanicilar olabilir!" << endl;
+                            break;
+                        }
+
+                        quizStart(branch);
+                        break;
+                    }
                 }
                 else if (userPreference == 3)
                     break;
                 else
                     cout << "Yanlis deger girdiniz! Lutfen tekrar deneyiniz." << endl;
-            }
-            if (isStarted)
-            {
-                quizStart();
-                break;
             }
         }
         else if (selectedAction == 3)
