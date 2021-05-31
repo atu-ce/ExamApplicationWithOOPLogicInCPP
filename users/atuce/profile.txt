@@ -1,6 +1,0 @@
-Isim: Tayyip
-Soyisim: Uzun
-Cinsiyet: erkek
-Yas: 21
-Kullanici adi: atuCE
-Parola: 112233

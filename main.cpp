@@ -58,7 +58,7 @@ string get_current_dir()
     return current_working_dir;
 }
 
-bool IsPathExist(const string &s)
+bool isPathExist(const string &s)
 {
     struct stat buffer;
     return (stat(s.c_str(), &buffer) == 0);
@@ -308,7 +308,7 @@ public:
         string way = get_current_dir();
         string usersWay = way + "/users";
 
-        bool isUsersFolder = IsPathExist(usersWay);
+        bool isUsersFolder = isPathExist(usersWay);
 
         if (!isUsersFolder)
         {
@@ -331,7 +331,7 @@ public:
         string way = get_current_dir();
         string loginInquiryWay = way + "/loginInquiry.txt";
 
-        bool isloginInquiryFile = IsPathExist(loginInquiryWay);
+        bool isloginInquiryFile = isPathExist(loginInquiryWay);
 
         if (!isloginInquiryFile)
         {
@@ -509,7 +509,7 @@ public:
         string way = get_current_dir();
         string usersWay = way + "/users";
 
-        bool isUsersFolder = IsPathExist(usersWay);
+        bool isUsersFolder = isPathExist(usersWay);
 
         if (!isUsersFolder)
         {
@@ -643,7 +643,7 @@ public:
         string way = get_current_dir();
         string usersWay = way + "/users";
 
-        bool isUsersFolder = IsPathExist(usersWay);
+        bool isUsersFolder = isPathExist(usersWay);
 
         if (!isUsersFolder)
         {
@@ -749,10 +749,25 @@ vector<Lessons> createLessonObjects(int whichGrader, string role)
     return lessonObjects;
 }
 
-// 1'e basıldığında bu fonksiyon çalışır. Yeni soru ekler.
-void questionAppend()
+// 1'e basıldığında bu fonksiyon çalışır. Branşa göre yeni soru ekler.
+void questionAppend(string branch)
 {
     string question, answer;
+    string way = get_current_dir();
+
+    string allQuestionsFolderWay = way + "/allQuestionsAndAnswers";
+    bool isAllQuestionFolder = isPathExist(allQuestionsFolderWay);
+    if (!isAllQuestionFolder)
+    {
+        int status = mkdir(allQuestionsFolderWay.c_str(), 0777);
+    }
+
+    string branchFolderWay = allQuestionsFolderWay + "/" + branch;
+    bool isBranchFolder = isPathExist(branchFolderWay);
+    if (!isBranchFolder)
+    {
+        int status = mkdir(branchFolderWay.c_str(), 0777);
+    }
 
     cout << "Soru: ";
     getline(cin, question);
@@ -764,12 +779,11 @@ void questionAppend()
     answer = trim(answer);
     answer = toLowercase(answer);
 
-    string way = get_current_dir();
-    string questionsAndAnswersWay = way + "/questionsAndAnswers.txt";
+    string questionsAndAnswersWay = branchFolderWay + "/questionsAndAnswers.txt";
 
     ofstream questionsAndAnswersFile;
     questionsAndAnswersFile.open(questionsAndAnswersWay, ios_base::app);
-    questionsAndAnswersFile << question << ": " << answer << endl;
+    questionsAndAnswersFile << question << "?: " << answer << endl;
     questionsAndAnswersFile.close();
 }
 
@@ -820,7 +834,7 @@ void createMenu()
             string way = get_current_dir();
             string loginInquiryWay = way + "/loginInquiry.txt";
 
-            bool isloginInquiryFile = IsPathExist(loginInquiryWay);
+            bool isloginInquiryFile = isPathExist(loginInquiryWay);
 
             if (!isloginInquiryFile)
             {
@@ -848,7 +862,7 @@ void createMenu()
 
             string userProfileWay = way + "/users/" + access + "/profile.txt";
 
-            string profileContent;
+            string profileContent, branch;
             ifstream readUserProfile(userProfileWay);
             string delimiter = ": ";
             bool isTeacher = false;
@@ -860,7 +874,7 @@ void createMenu()
                 if (token == "Parola")
                 {
                     profileContent.erase(0, profileContent.find(delimiter) + delimiter.length());
-                    passwordByDataBase = profileContent;
+                    passwordByDataBase = stoi(profileContent);
                     continue;
                 }
                 if (token == "Unvan")
@@ -868,7 +882,13 @@ void createMenu()
                     profileContent.erase(0, profileContent.find(delimiter) + delimiter.length());
                     if (profileContent == "Ogretmen")
                         isTeacher = true;
-                    break;
+                    continue;
+                }
+                if (token == "Brans")
+                {
+                    profileContent.erase(0, profileContent.find(delimiter) + delimiter.length());
+                    branch = profileContent;
+                    continue;
                 }
             }
             if (!isTeacher)
@@ -886,7 +906,7 @@ void createMenu()
                 cout << "Hatali parola girislerinden dolayi oturum acma islemi iptal edilmistir! Lutfen tekrar deneyiniz." << endl;
                 continue;
             }
-            questionAppend();
+            questionAppend(branch);
         }
         else if (selectedAction == 2)
         {

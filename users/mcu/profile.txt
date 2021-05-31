@@ -1,6 +1,0 @@
-Isim: can
-Soyisim: uzun
-Cinsiyet: erkek
-Yas: 7
-Kullanici adi: mcu
-Parola: 123
