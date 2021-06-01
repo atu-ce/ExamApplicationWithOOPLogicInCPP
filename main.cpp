@@ -146,7 +146,7 @@ public:
     }
 
     // Bu fonksiyon, gelen question objesini ekrana yazdırır.
-    void disPlayQuestion()
+    void disPlayQuestion(string course)
     {
         Questions question = getQuestion();
         string answer;
@@ -156,7 +156,7 @@ public:
         answer = toLowercase(answer);
         answer = trim(answer);
         guess(answer);
-        loadQuestion();
+        loadQuestion(course);
     }
 
     // Bu fonksiyonun amacı, koşulsuz index numarasını arttırmak ve
@@ -180,17 +180,17 @@ public:
     }
 
     // İndex aşımını kontrol eder.
-    void loadQuestion()
+    void loadQuestion(string course)
     {
         if (questions.size() == questionIndex)
         {
-            createQuizResults();
+            createQuizResults(course);
             showScore();
         }
         else
         {
             disPlayProgress();
-            disPlayQuestion();
+            disPlayQuestion(course);
         }
     }
 
@@ -245,7 +245,7 @@ public:
     }
 
     // Sınav bitiminde bu fonksiyon çalışır, giriş yapan kullanıcının klasörüne o anki 'tarih-saat.txt' dosyası oluşturulur ve doğru-yanlış cevap tablosu dosyaya eklenir.
-    void createQuizResults()
+    void createQuizResults(string course)
     {
         string createdDate, createdTime, createdDateTime;
 
@@ -256,9 +256,16 @@ public:
         createdTime = to_string(ltm->tm_hour) + "_" + to_string(ltm->tm_min) + "_" + to_string(ltm->tm_sec);
         createdDateTime = createdDate + "_" + createdTime;
 
-        string way = get_current_dir() + "/users/" + globalUsername + "/" + createdDateTime + ".txt";
+        string way = get_current_dir() + "/users/" + globalUsername + "/" + course;
+        bool isCourseFolder = isPathExist(way);
 
-        ofstream dateTimeFile(way);
+        if (!isCourseFolder)
+        {
+            int status = mkdir(way.c_str(), 0777);
+        }
+        string resultsWay = way + "/" + createdDateTime + ".txt";
+
+        ofstream dateTimeFile(resultsWay);
         dateTimeFile << "Dogru Cevaplariniz:" << endl;
         for (int i = 0; i < totalTrueAnswer; i++)
         {
@@ -574,7 +581,7 @@ public:
     }
 
     // Kullanıcıdan gerekli bilgiler istenir, gelen değer ile kullanıcı oluşturulur ve bilgiler profile.txt dosyasına kaydedilir.
-    virtual bool signUp()
+    bool signUp()
     {
         cout << "Sistemimiz asagida listelenmis branslari kapsamaktadir," << endl;
         cout << "1.) Matematik\n2.) Fizik\n3.) Bilgisayar Bolumu Ogretmeni\n4.) Makine Bolumu Ogretmeni" << endl;
@@ -820,7 +827,7 @@ void questionAppend(string branch, string course)
 
     ofstream questionsAndAnswersFile;
     questionsAndAnswersFile.open(questionsAndAnswersWay, ios_base::app);
-    questionsAndAnswersFile << question << "?: " << answer << endl;
+    questionsAndAnswersFile << question << ": " << answer << endl;
     questionsAndAnswersFile.close();
 }
 
@@ -879,7 +886,7 @@ void quizStart(string branch, string course)
     else
     {
         Quiz quiz(questions);
-        quiz.loadQuestion();
+        quiz.loadQuestion(course);
     }
 }
 
@@ -1001,11 +1008,10 @@ void createMenu()
 
             cout << "Asagida bransiniza uygun dersler listelenmistir.";
 
-            string way = get_current_dir();
             string branchesWay = way + "/allLessons/branches/" + branch + "Lessons.txt";
-            string fileContent;
             ifstream readBranchFile(branchesWay);
             int counter = 0;
+            fileContent = "";
             while (getline(readBranchFile, fileContent))
             {
                 counter++;
@@ -1132,8 +1138,75 @@ void createMenu()
                             cout << "Sinavi sadece 'Ogrenci' unvanina sahip kullanicilar olabilir!" << endl;
                             break;
                         }
-                        // NOW STAY
-                        quizStart(branch);
+
+                        printf("Asagida dersleriniz listelenmistir,\n");
+                        profileContent = "";
+                        int counter = 0;
+                        while (getline(readUserProfile, profileContent))
+                        {
+                            string token = profileContent.substr(0, profileContent.find(delimiter));
+                            if (token == "Dersleri")
+                            {
+                                profileContent.erase(0, profileContent.find(delimiter) + delimiter.length());
+                                delimiter = ", ";
+                                int pos = 0;
+                                token = "";
+                                while ((pos = profileContent.find(delimiter)) != string::npos)
+                                {
+                                    counter++;
+                                    token = profileContent.substr(0, pos);
+                                    cout << counter << ".) " << token << endl;
+                                    profileContent.erase(0, pos + delimiter.length());
+                                }
+                                cout << counter << ".) " << profileContent << endl;
+                                break;
+                            }
+                        }
+                        readUserProfile.close();
+
+                        int courseNumber;
+                        string course;
+                        while (true)
+                        {
+                            cout << "Sinav olmak istediginiz dersin numarasini giriniz: ";
+                            cin >> courseNumber;
+                            if (courseNumber > counter || courseNumber <= 0)
+                            {
+                                cout << "Yanlis deger girdiniz! Lutfen tekrar deneyiniz." << endl;
+                                continue;
+                            }
+
+                            int meter = 0;
+                            profileContent = "";
+                            while (getline(readUserProfile, profileContent))
+                            {
+                                string token = profileContent.substr(0, profileContent.find(delimiter));
+                                if (token == "Dersleri")
+                                {
+                                    profileContent.erase(0, profileContent.find(delimiter) + delimiter.length());
+                                    delimiter = ", ";
+                                    int pos = 0;
+                                    token = "";
+                                    while ((pos = profileContent.find(delimiter)) != string::npos)
+                                    {
+                                        meter++;
+                                        token = profileContent.substr(0, pos);
+                                        profileContent.erase(0, pos + delimiter.length());
+                                        if (meter == courseNumber)
+                                        {
+                                            course = token;
+                                            break;
+                                        }
+                                    }
+                                    if ((meter+1)==courseNumber )
+                                        course=profileContent;
+                                    break;
+                                }
+                            }
+                            readUserProfile.close();
+                            break;
+                        }
+                        quizStart(branch, course);
                         break;
                     }
                 }
