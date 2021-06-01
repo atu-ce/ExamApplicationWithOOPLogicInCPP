@@ -1,0 +1,8 @@
+Kullanici Adi: atuce
+Parola: 123
+Isim: ahmet tayyip
+Soyisim: uzun
+Cinsiyet: erkek
+Yas: 21
+Unvan: Ogretmen
+Brans: Bilgisayar
