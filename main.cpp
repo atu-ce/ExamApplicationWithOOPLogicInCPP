@@ -440,42 +440,20 @@ class Lessons
 protected:
     string letterGrade;
     float average;
-    vector<int> notes;
+    int note;
 
 public:
     string courseName;
     int currentClass;
     friend string isPassed(Lessons lessons);
 
-    Lessons(string comCourseName, int comCurrentClass, int comTotalExams, int comFinishedExams)
-    {
-        courseName = comCourseName;
-        currentClass = comCurrentClass;
-        totalExams = comTotalExams;
-        finishedExams = comFinishedExams;
-        letterGrade = "";
-        average = 0.0;
-        notes = {};
-    }
-    Lessons(string comCourseName, int comCurrentClass, int comTotalExams)
-    {
-        courseName = comCourseName;
-        currentClass = comCurrentClass;
-        totalExams = comTotalExams;
-        finishedExams = 0;
-        letterGrade = "";
-        average = 0.0;
-        notes = {};
-    }
     Lessons(string comCourseName, int comCurrentClass)
     {
         courseName = comCourseName;
         currentClass = comCurrentClass;
-        totalExams = 2;
-        finishedExams = 0;
         letterGrade = "";
         average = 0.0;
-        notes = {};
+        note = 0;
     }
 };
 
@@ -989,286 +967,173 @@ void quizStart(string course)
 // Menünün oluşturulduğu bölüm
 void createMenu()
 {
-    /*
-        Menü Aşağıdaki gibi olmalı!
-        > Kayıt Ol
-            Bilgiler alınır tekrar ana menüye dönülür.
-        > Giriş Yap
-            Gİriş başarılı ise,
-            Öğretmen için;
-                > Soru Ekle
-                > Ders Başarı Raporunu Görüntüle
-                > Ana Menü
-            Öğrenci için;
-            > Sınav Ol
-            > Sonuçları Gör
-            > Ana Menü
-        > Çıkış
-    */
-    int selectedAction = 0;
     while (true)
     {
-        cout << "\n1.) Soru Ekle\n2.) Sinava Basla\n3.) Cikis\nTercihiniz: ";
+        int selectedAction = 0;
+        cout << "\n1.) Kayit Ol\n2.) Giris Yap\n3.) Cikis\nTercihiniz: ";
         cin >> selectedAction;
 
         if (selectedAction == 1)
         {
-            string access = "";
-            int password = 0;
-            bool isUser = false;
-
-            // Soru eklemeyi sadece öğretmenlerin yapabilmesi için gerekli kod dizini.
-            cout << "Kullanici adi: ";
-            cin >> access;
-            access = trim(access);
-            access = toLowercase(access);
-
-            string way = get_current_dir();
-            string loginInquiryWay = way + "/loginInquiry.txt";
-
-            bool isloginInquiryFile = isPathExist(loginInquiryWay);
-
-            if (!isloginInquiryFile)
-            {
-                ofstream loginInquiryFile(loginInquiryWay);
-                loginInquiryFile.close();
-            }
-
-            string fileContent = "";
-            ifstream readLoginInquiryFile(loginInquiryWay);
-
-            while (getline(readLoginInquiryFile, fileContent))
-            {
-                if (access == fileContent)
-                {
-                    isUser = true;
-                    break;
-                }
-            }
-            readLoginInquiryFile.close();
-            if (!isUser)
-            {
-                cout << "Girmis oldugunuz '" << access << "' adli kullanici sisteme kayitli degildir! Kullanici adinizdan emin olunuz." << endl;
-                continue;
-            }
-
-            string userProfileWay = way + "/users/" + access + "/profile.txt";
-
-            string profileContent = "", branch = "", course = "";
-            ifstream readUserProfile(userProfileWay);
-            string delimiter = ": ";
-            bool isTeacher = false;
-            int passwordByDataBase = 0;
-
-            while (getline(readUserProfile, profileContent))
-            {
-                string token = profileContent.substr(0, profileContent.find(delimiter));
-                if (token == "Parola")
-                {
-                    profileContent.erase(0, profileContent.find(delimiter) + delimiter.length());
-                    passwordByDataBase = stoi(profileContent);
-                    continue;
-                }
-                if (token == "Unvan")
-                {
-                    profileContent.erase(0, profileContent.find(delimiter) + delimiter.length());
-                    if (profileContent == "Ogretmen")
-                        isTeacher = true;
-                    continue;
-                }
-                if (token == "Brans")
-                {
-                    profileContent.erase(0, profileContent.find(delimiter) + delimiter.length());
-                    branch = profileContent;
-                    continue;
-                }
-            }
-            readUserProfile.close();
-            if (!isTeacher)
-            {
-                cout << "Soru ekleme yetkiniz yok!" << endl;
-                continue;
-            }
-
-            cout << "Parola: ";
-            cin >> password;
-
-            string checkPassword = passwordCheck(passwordByDataBase, password);
-            if (checkPassword == "failed")
-            {
-                cout << "Hatali parola girislerinden dolayi oturum acma islemi iptal edilmistir! Lutfen tekrar deneyiniz." << endl;
-                continue;
-            }
-
-            cout << "\nAsagida bransiniza uygun dersler listelenmistir." << endl;
-
-            string branchesWay = way + "/allLessons/branches/" + branch + "Lessons.txt";
-            ifstream readBranchFile;
-            int counter = 0;
-            fileContent = "";
-            readBranchFile.open(branchesWay, ios_base::out);
-            while (getline(readBranchFile, fileContent))
-            {
-                counter++;
-                cout << counter << ".) " << fileContent << endl;
-            }
-            readBranchFile.close();
-
-            int courseNumber = 0;
+            string authority = "";
+            cout << "\nYapabileceginiz unvan tercihleri: ogretmen/teacher/t veya ogrenci/student/s" << endl;
             while (true)
             {
-                cout << "Sorusunu eklemek istediginiz dersin numarasini giriniz: ";
-                cin >> courseNumber;
-                if (courseNumber > counter || courseNumber <= 0)
-                {
-                    cout << "Yanlis deger girdiniz! Lutfen tekrar deneyiniz." << endl;
-                    continue;
-                }
+                cout << "Unvaniniz: ";
+                cin >> authority;
+                authority = trim(authority);
+                authority = toLowercase(authority);
 
-                int meter = 0;
-                fileContent = "";
-                readBranchFile.open(branchesWay, ios_base::out);
-                while (getline(readBranchFile, fileContent))
+                if (authority == "ogretmen" || authority == "teacher" || authority == "t")
                 {
-                    meter++;
-                    if (meter == courseNumber)
+                    int passwordForTeacherByUser = 0;
+                    Teachers userTeacher;
+                    cout << "\nOgretmenlik unvanini secebilmeniz icin sistemin size verdigi sifreyi girmeniz gerekmektedir.\nSifre: ";
+                    cin >> passwordForTeacherByUser;
+
+                    string result = passwordCheck(userTeacher.getPasswordForTeacher(), passwordForTeacherByUser);
+                    if (result == "failed")
                     {
-                        course = fileContent;
+                        cout << "Cok fazla hatali giris yaptiniz! Guncel sifreye sahip oldugunuzdan emin olunuz." << endl;
                         break;
                     }
+                    cout << "Sifre dogru, ogretmenlik unvaninda kullanici olusturabilirsiniz." << endl;
+                    userTeacher.title = "Ogretmen";
+                    bool isRegistered = userTeacher.signUp();
+                    if (isRegistered)
+                        break;
+                    cout << "Kullanici olusturma asamasinda bir hata olustu! Lutfen tekrar deneyiniz." << endl;
                 }
-                readBranchFile.close();
-                break;
+                else if (authority == "ogrenci" || authority == "student" || authority == "s")
+                {
+                    Students userStudent;
+                    userStudent.title = "Ogrenci";
+                    bool isRegistered = userStudent.signUp();
+                    if (isRegistered)
+                        break;
+                    cout << "Kullanici olusturma asamasinda bir hata olustu! Lutfen tekrar deneyiniz." << endl;
+                }
+                else
+                    cout << "Yanlis deger girdiniz! Lutfen tekrar deneyiniz." << endl;
             }
-            cout << "course: " << course << endl;
-            questionAppend(course);
         }
         else if (selectedAction == 2)
         {
-            while (true)
+            bool isLoggedIn = Users().signIn();
+            if (!isLoggedIn)
+                break;
+            if (isStarted)
             {
-                int userPreference = 0;
-                cout << "\n1.) Kayit Ol\n2.) Giris Yap\n3.) Ana Menu\nTercihiniz: ";
-                cin >> userPreference;
+                string way = get_current_dir();
+                string userProfileWay = way + "/users/" + globalUsername + "/profile.txt";
 
-                if (userPreference == 1)
+                string profileContent = "";
+                string delimiter = ": ";
+                bool isTeacher = false;
+                ifstream readUserProfile;
+                readUserProfile.open(userProfileWay, ios_base::out);
+                while (getline(readUserProfile, profileContent))
                 {
-                    string authority = "";
-                    cout << "Yapabileceginiz unvan tercihleri: ogretmen/teacher/t veya ogrenci/student/s" << endl;
+                    string token = profileContent.substr(0, profileContent.find(delimiter));
+                    if (token == "Unvan")
+                    {
+                        profileContent.erase(0, profileContent.find(delimiter) + delimiter.length());
+                        if (profileContent == "Ogretmen")
+                            isTeacher = true;
+                        continue;
+                    }
+                }
+                readUserProfile.close();
+                if (isTeacher)
+                {
+                    int userPreference = 0;
                     while (true)
                     {
-                        cout << "Unvaniniz: ";
-                        cin >> authority;
-                        authority = trim(authority);
-                        authority = toLowercase(authority);
+                        cout << "\n1.) Soru Ekle\n2.) Ana Menü\nTercihiniz: ";
+                        cin >> userPreference;
 
-                        if (authority == "ogretmen" || authority == "teacher" || authority == "t")
+                        if (userPreference == 1)
                         {
-                            int passwordForTeacherByUser = 0;
-                            Teachers userTeacher;
-                            cout << "Ogretmenlik unvanini secebilmeniz icin sistemin size verdigi sifreyi girmeniz gerekmektedir.\nSifre: ";
-                            cin >> passwordForTeacherByUser;
+                            string userProfileWay = way + "/users/" + globalUsername + "/profile.txt";
 
-                            string result = passwordCheck(userTeacher.getPasswordForTeacher(), passwordForTeacherByUser);
-                            if (result == "failed")
+                            string branch = "", course = "";
+                            string delimiter = ": ";
+                            profileContent = "";
+                            ifstream readUserProfile;
+                            readUserProfile.open(userProfileWay, ios_base::out);
+                            while (getline(readUserProfile, profileContent))
                             {
-                                cout << "Cok fazla hatali giris yaptiniz! Guncel sifreye sahip oldugunuzdan emin olunuz." << endl;
+                                string token = profileContent.substr(0, profileContent.find(delimiter));
+                                if (token == "Brans")
+                                {
+                                    profileContent.erase(0, profileContent.find(delimiter) + delimiter.length());
+                                    branch = profileContent;
+                                    break;
+                                }
+                            }
+                            readUserProfile.close();
+
+                            cout << "\nAsagida bransiniza uygun dersler listelenmistir." << endl;
+
+                            string branchesWay = way + "/allLessons/branches/" + branch + "Lessons.txt";
+                            ifstream readBranchFile;
+                            int counter = 0;
+                            string fileContent = "";
+                            readBranchFile.open(branchesWay, ios_base::out);
+                            while (getline(readBranchFile, fileContent))
+                            {
+                                counter++;
+                                cout << counter << ".) " << fileContent << endl;
+                            }
+                            readBranchFile.close();
+
+                            int courseNumber = 0;
+                            while (true)
+                            {
+                                cout << "Sorusunu eklemek istediginiz dersin numarasini giriniz: ";
+                                cin >> courseNumber;
+                                if (courseNumber > counter || courseNumber <= 0)
+                                {
+                                    cout << "Yanlis deger girdiniz! Lutfen tekrar deneyiniz." << endl;
+                                    continue;
+                                }
+
+                                int meter = 0;
+                                fileContent = "";
+                                readBranchFile.open(branchesWay, ios_base::out);
+                                while (getline(readBranchFile, fileContent))
+                                {
+                                    meter++;
+                                    if (meter == courseNumber)
+                                    {
+                                        course = fileContent;
+                                        break;
+                                    }
+                                }
+                                readBranchFile.close();
                                 break;
                             }
-                            cout << "Sifre dogru, ogretmenlik unvaninda kullanici olusturabilirsiniz." << endl;
-                            userTeacher.title = "Ogretmen";
-                            bool isRegistered = userTeacher.signUp();
-                            if (isRegistered)
-                                break;
-                            cout << "Kullanici olusturma asamasinda bir hata olustu! Lutfen tekrar deneyiniz." << endl;
+                            questionAppend(course);
                         }
-                        else if (authority == "ogrenci" || authority == "student" || authority == "s")
-                        {
-                            Students userStudent;
-                            userStudent.title = "Ogrenci";
-                            bool isRegistered = userStudent.signUp();
-                            if (isRegistered)
-                                break;
-                            cout << "Kullanici olusturma asamasinda bir hata olustu! Lutfen tekrar deneyiniz." << endl;
-                        }
+                        else if (userPreference == 2)
+                            break;
                         else
                             cout << "Yanlis deger girdiniz! Lutfen tekrar deneyiniz." << endl;
                     }
-                    break;
                 }
-                else if (userPreference == 2)
+                else
                 {
-                    bool isLoggedIn = Users().signIn();
-                    if (!isLoggedIn)
-                        break;
-                    if (isStarted)
+                    int userPreference = 0;
+                    while (true)
                     {
-                        string way = get_current_dir();
-                        string userProfileWay = way + "/users/" + globalUsername + "/profile.txt";
+                        cout << "\n1.) Sinav Ol\n2.) Ana Menü\nTercihiniz: ";
+                        cin >> userPreference;
 
-                        string profileContent = "";
-                        string delimiter = ": ";
-                        bool isStudent = false;
-                        ifstream readUserProfile;
-                        readUserProfile.open(userProfileWay, ios_base::out);
-                        while (getline(readUserProfile, profileContent))
+                        if (userPreference == 1)
                         {
-                            string token = profileContent.substr(0, profileContent.find(delimiter));
-                            if (token == "Unvan")
-                            {
-                                profileContent.erase(0, profileContent.find(delimiter) + delimiter.length());
-                                if (profileContent == "Ogrenci")
-                                    isStudent = true;
-                                continue;
-                            }
-                        }
-                        readUserProfile.close();
-                        if (!isStudent)
-                        {
-                            cout << "Sinavi sadece 'Ogrenci' unvanina sahip kullanicilar olabilir!" << endl;
-                            break;
-                        }
-
-                        printf("\nAsagida dersleriniz listelenmistir,\n");
-                        profileContent = "";
-                        int counter = 0;
-                        readUserProfile.open(userProfileWay, ios_base::out);
-                        while (getline(readUserProfile, profileContent))
-                        {
-                            string token = profileContent.substr(0, profileContent.find(delimiter));
-                            if (token == "Dersleri")
-                            {
-                                profileContent.erase(0, profileContent.find(delimiter) + delimiter.length());
-                                delimiter = ", ";
-                                size_t pos = 0;
-                                token = "";
-                                while ((pos = profileContent.find(delimiter)) != string::npos)
-                                {
-                                    counter++;
-                                    token = profileContent.substr(0, pos);
-                                    cout << counter << ".) " << token << endl;
-                                    profileContent.erase(0, pos + delimiter.length());
-                                }
-                                break;
-                            }
-                        }
-                        readUserProfile.close();
-
-                        int courseNumber = 0;
-                        string course = "";
-                        while (true)
-                        {
-                            cout << "Sinav olmak istediginiz dersin numarasini giriniz: ";
-                            cin >> courseNumber;
-                            if (courseNumber > counter || courseNumber <= 0)
-                            {
-                                cout << "Yanlis deger girdiniz! Lutfen tekrar deneyiniz." << endl;
-                                continue;
-                            }
-
-                            int meter = 0;
+                            printf("\nAsagida dersleriniz listelenmistir,\n");
                             profileContent = "";
-                            delimiter = ": ";
+                            int counter = 0;
                             readUserProfile.open(userProfileWay, ios_base::out);
                             while (getline(readUserProfile, profileContent))
                             {
@@ -1277,33 +1142,70 @@ void createMenu()
                                 {
                                     profileContent.erase(0, profileContent.find(delimiter) + delimiter.length());
                                     delimiter = ", ";
-                                    int pos = 0;
+                                    size_t pos = 0;
                                     token = "";
                                     while ((pos = profileContent.find(delimiter)) != string::npos)
                                     {
-                                        meter++;
+                                        counter++;
                                         token = profileContent.substr(0, pos);
-                                        if (meter == courseNumber)
-                                        {
-                                            course = token;
-                                            break;
-                                        }
+                                        cout << counter << ".) " << token << endl;
                                         profileContent.erase(0, pos + delimiter.length());
                                     }
                                     break;
                                 }
                             }
                             readUserProfile.close();
-                            break;
+
+                            int courseNumber = 0;
+                            string course = "";
+                            while (true)
+                            {
+                                cout << "Sinav olmak istediginiz dersin numarasini giriniz: ";
+                                cin >> courseNumber;
+                                if (courseNumber > counter || courseNumber <= 0)
+                                {
+                                    cout << "Yanlis deger girdiniz! Lutfen tekrar deneyiniz." << endl;
+                                    continue;
+                                }
+
+                                int meter = 0;
+                                profileContent = "";
+                                delimiter = ": ";
+                                readUserProfile.open(userProfileWay, ios_base::out);
+                                while (getline(readUserProfile, profileContent))
+                                {
+                                    string token = profileContent.substr(0, profileContent.find(delimiter));
+                                    if (token == "Dersleri")
+                                    {
+                                        profileContent.erase(0, profileContent.find(delimiter) + delimiter.length());
+                                        delimiter = ", ";
+                                        int pos = 0;
+                                        token = "";
+                                        while ((pos = profileContent.find(delimiter)) != string::npos)
+                                        {
+                                            meter++;
+                                            token = profileContent.substr(0, pos);
+                                            if (meter == courseNumber)
+                                            {
+                                                course = token;
+                                                break;
+                                            }
+                                            profileContent.erase(0, pos + delimiter.length());
+                                        }
+                                        break;
+                                    }
+                                }
+                                readUserProfile.close();
+                                break;
+                            }
+                            quizStart(course);
                         }
-                        quizStart(course);
-                        break;
+                        else if (userPreference == 2)
+                            break;
+                        else
+                            cout << "Yanlis deger girdiniz! Lutfen tekrar deneyiniz." << endl;
                     }
                 }
-                else if (userPreference == 3)
-                    break;
-                else
-                    cout << "Yanlis deger girdiniz! Lutfen tekrar deneyiniz." << endl;
             }
         }
         else if (selectedAction == 3)
@@ -1312,7 +1214,7 @@ void createMenu()
             break;
         }
         else
-            printf("Yanlis deger girdiniz. Lutfen tekrar deneyiniz.\n");
+            cout << "Yanlis deger girdiniz! Lutfen tekrar deneyiniz." << endl;
     }
 }
 
