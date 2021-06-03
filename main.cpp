@@ -19,6 +19,8 @@
 
 using namespace std;
 
+#include "classPeople.h"
+
 // Global olarak tanımlanan değişkenler.
 bool isStarted = false;
 string globalUsername = "";
@@ -433,16 +435,6 @@ public:
             }
         }
     }
-};
-
-class People
-{
-protected:
-    string name, surname, gender;
-    int age;
-
-public:
-    People();
 };
 
 // Scope resolution operator yapısı kullanıldı.
