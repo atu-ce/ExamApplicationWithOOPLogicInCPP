@@ -198,7 +198,8 @@ public:
     friend string isPassed(Lessons lesson);
 };
 
-// Gerekli Prototip
+// Gerekli prototipler (bildirimler) yapıldı.
+vector<Lessons> createLessonObjects(int whichGrader, string role);
 string isPassed(Lessons lesson);
 
 class Quiz
@@ -563,9 +564,6 @@ public:
         return true;
     }
 };
-
-// Prototip (bildirim) yapıldı.
-vector<Lessons> createLessonObjects(int whichGrader, string role);
 
 class Students : public Users
 {
