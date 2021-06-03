@@ -80,9 +80,9 @@ string passwordCheck(int firstPassword, int secondPassword)
     {
         while (true)
         {
-            if (counter == 22)
+            if (counter == 2)
             {
-                cout << "3 defa yanlis parola girdiniz!" << endl;
+                cout << "\n3 defa yanlis parola girdiniz!" << endl;
                 return "failed";
             }
             cout << "Parola uyusmuyor! Lutfen tekrar giriniz.\nParola: ";
@@ -396,14 +396,13 @@ public:
             {
                 ofstream resultsFile(resultsWay);
 
+                resultsFile << "\n"
+                            << string(40, '*') << " Sinav Sonucu " << string(46, '*') << endl;
+
                 if (isRealResult)
-                {
                     resultsFile << course << " dersinden aldiginiz orjinal notunuzdur." << endl;
-                }
                 else
-                {
                     resultsFile << course << " dersinden aldiginiz deneme notunuzdur. Bu notun bir hukmu yoktur!" << endl;
-                }
 
                 Lessons lesson = Lessons(course);
                 lesson.setNote(score);
@@ -427,6 +426,8 @@ public:
                 if (totalFalseAnswer == 0)
                     resultsFile << " > Yanlis cevabiniz yok." << endl;
                 resultsFile << "\nSonuc: " << isPassed(lesson) << endl;
+                resultsFile << "\n"
+                            << string(100, '*') << endl;
                 resultsFile.close();
             }
         }
@@ -762,7 +763,7 @@ public:
     // Kullanıcıdan gerekli bilgiler istenir, gelen değer ile kullanıcı oluşturulur ve bu bilgiler 'profile.txt' dosyasına kaydedilir.
     bool signUp()
     {
-        cout << "Sistemimiz asagida listelenmis branslari kapsamaktadir," << endl;
+        cout << "\nSistemimiz asagida listelenmis branslari kapsamaktadir," << endl;
         cout << "1.) Matematik\n2.) Fizik\n3.) Bilgisayar Bolumu Ogretmeni\n4.) Makine Bolumu Ogretmeni" << endl;
         string branch = "";
         while (true)
@@ -1079,7 +1080,7 @@ void quizStart(string course)
     }
 }
 
-// Parametre olarak gönderilen dersin istenilen sınav sonucunu ekrana yazdıran fonksiyon. 
+// Parametre olarak gönderilen dersin istenilen sınav sonucunu ekrana yazdıran fonksiyon.
 bool showQuizResult(string course)
 {
     string way = get_current_dir() + "/users/" + globalUsername + "/" + course;
@@ -1118,7 +1119,8 @@ bool showQuizResult(string course)
             string quizDate = "", quizTime = "";
             while (true)
             {
-                cout << "\nGeri donmek icin 'geri' veya 'g' yaziniz\n" << endl;
+                cout << "\nGeri donmek icin 'geri' veya 'g' yaziniz\n"
+                     << endl;
                 cout << "Sinav oldugunuz tarihi sirasiyla Gun_Ay_Yil biciminde giriniz.\nTarih: ";
                 cin >> quizDate;
 
@@ -1218,7 +1220,7 @@ void createMenu()
         {
             bool isLoggedIn = Users().signIn();
             if (!isLoggedIn)
-                break;
+                continue;
             if (isStarted)
             {
                 string way = get_current_dir();
@@ -1251,12 +1253,9 @@ void createMenu()
 
                         if (userPreference == 1)
                         {
-                            string userProfileWay = way + "/users/" + globalUsername + "/profile.txt";
-
                             string branch = "", course = "";
-                            string delimiter = ": ";
+                            delimiter = ": ";
                             profileContent = "";
-                            ifstream readUserProfile;
                             readUserProfile.open(userProfileWay, ios_base::out);
                             while (getline(readUserProfile, profileContent))
                             {
@@ -1319,7 +1318,8 @@ void createMenu()
                     }
                     if (userPreference == 3)
                     {
-                        cout << string(40, '*') << " Uygulama Sonlandirildi " << string(36, '*') << endl;
+                        cout << string(40, '*') << " Uygulama Sonlandirildi " << string(36, '*') << endl
+                             << endl;
                         break;
                     }
                 }
@@ -1329,12 +1329,15 @@ void createMenu()
                     {
                         cout << "\n1.) Sinav Ol\n2.) Sonucu Goruntule\n3.) Ana Menü\n4.) Cikis Yap\nTercihiniz: ";
                         cin >> userPreference;
+                        string bug = "";
+                        getline(cin, bug); // getline() fonksiyonunun bir bug'ından dolayı bu satır yazılmıştır.
 
                         if (userPreference == 1 || userPreference == 2)
                         {
                             printf("\nAsagida dersleriniz listelenmistir,\n");
                             profileContent = "";
                             int counter = 0;
+                            delimiter = ": ";
                             readUserProfile.open(userProfileWay, ios_base::out);
                             while (getline(readUserProfile, profileContent))
                             {
@@ -1407,10 +1410,9 @@ void createMenu()
                                 quizStart(course);
                             else
                             {
-                                bool isShowQuizResult=showQuizResult(course);
+                                bool isShowQuizResult = showQuizResult(course);
                                 if (!isShowQuizResult)
                                     continue;
-                                
                             }
                         }
                         else if (userPreference == 3 || userPreference == 4)
@@ -1420,7 +1422,8 @@ void createMenu()
                     }
                     if (userPreference == 4)
                     {
-                        cout << string(40, '*') << " Uygulama Sonlandirildi " << string(36, '*') << endl;
+                        cout << string(40, '*') << " Uygulama Sonlandirildi " << string(36, '*') << endl
+                             << endl;
                         break;
                     }
                 }
@@ -1428,7 +1431,8 @@ void createMenu()
         }
         else if (selectedAction == 3)
         {
-            cout << string(40, '*') << " Uygulama Sonlandirildi " << string(36, '*') << endl;
+            cout << string(40, '*') << " Uygulama Sonlandirildi " << string(36, '*') << endl
+                 << endl;
             break;
         }
         else
