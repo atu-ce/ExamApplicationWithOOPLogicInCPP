@@ -1044,12 +1044,12 @@ void createMenu()
                     }
                 }
                 readUserProfile.close();
+                int userPreference = 0;
                 if (isTeacher)
                 {
-                    int userPreference = 0;
                     while (true)
                     {
-                        cout << "\n1.) Soru Ekle\n2.) Ana Menü\nTercihiniz: ";
+                        cout << "\n1.) Soru Ekle\n2.) Ana Menü\n3.) Cikis Yap\nTercihiniz: ";
                         cin >> userPreference;
 
                         if (userPreference == 1)
@@ -1115,7 +1115,7 @@ void createMenu()
                             }
                             questionAppend(course);
                         }
-                        else if (userPreference == 2)
+                        else if (userPreference == 2 || userPreference == 3)
                             break;
                         else
                             cout << "Yanlis deger girdiniz! Lutfen tekrar deneyiniz." << endl;
@@ -1123,10 +1123,9 @@ void createMenu()
                 }
                 else
                 {
-                    int userPreference = 0;
                     while (true)
                     {
-                        cout << "\n1.) Sinav Ol\n2.) Ana Menü\nTercihiniz: ";
+                        cout << "\n1.) Sinav Ol\n2.) Ana Menü\n3.)Cikis Yap\nTercihiniz: ";
                         cin >> userPreference;
 
                         if (userPreference == 1)
@@ -1200,11 +1199,16 @@ void createMenu()
                             }
                             quizStart(course);
                         }
-                        else if (userPreference == 2)
+                        else if (userPreference == 2 || userPreference == 3)
                             break;
                         else
                             cout << "Yanlis deger girdiniz! Lutfen tekrar deneyiniz." << endl;
                     }
+                }
+                if (userPreference == 3)
+                {
+                    cout << string(50, '*') << " Uygulama Sonlandirildi " << string(50, '*') << endl;
+                    break;
                 }
             }
         }

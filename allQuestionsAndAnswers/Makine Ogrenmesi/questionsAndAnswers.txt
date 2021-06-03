@@ -1,0 +1,1 @@
+makine ogrenmesi nedir: verilerden ögrenen algoritmadir
