@@ -1,3 +1,4 @@
+// Uygulamanın çalışması için gerekli kütüphaneler.
 #include <iostream>
 #include <string>
 #include <vector>
@@ -7,6 +8,7 @@
 #include <ctime>
 #include <algorithm>
 
+// İşletim sistemine göre uygun kütüphaneyi include (dahil) edecek kod dizisi.
 #ifdef WINDOWS
 #include <direct.h>
 #define GetCurrentDir _getcwd
@@ -17,19 +19,23 @@
 
 using namespace std;
 
+// Global olarak tanımlanan değişkenler.
 bool isStarted = false;
 string globalUsername = "";
 
+// Uygulamaya giriş başarısız olduğunda bu fonksiyon çağrılacak, 'isStarted' değerini 'false' yapan fonksiyon.
 void registrationFailed()
 {
     isStarted = false;
 }
 
+// Uygulamaya giriş başarılı olduğunda bu fonksiyon çağrılacak, 'isStarted' değerini 'true' yapan fonksiyon.
 void userCreated()
 {
     isStarted = true;
 }
 
+// Sağda ve soldaki boşlukları kırpan fonksiyon.
 string trim(const string &str, const string &whitespace = " \t")
 {
     const auto strBegin = str.find_first_not_of(whitespace);
@@ -42,6 +48,7 @@ string trim(const string &str, const string &whitespace = " \t")
     return str.substr(strBegin, strRange);
 }
 
+// Parametre olarak verilen string tipindeki değişkenin içeriğindeki karakterleri küçük harfe dönüştüren fonksiyon.
 string toLowercase(string data)
 {
     for_each(data.begin(), data.end(), [](char &c)
@@ -49,6 +56,7 @@ string toLowercase(string data)
     return data;
 }
 
+// Bulunduğu dizinin adres yolunu döndüren fonksiyon.
 string get_current_dir()
 {
     char buff[FILENAME_MAX];
@@ -57,12 +65,14 @@ string get_current_dir()
     return current_working_dir;
 }
 
+// Parametre olarak verilen string tipindeki adres yolunda, belirtilen klasörün yada dosyanın olup olmadığını kontrol eder.
 bool isPathExist(const string &s)
 {
     struct stat buffer;
     return (stat(s.c_str(), &buffer) == 0);
 }
 
+// Parametre olarak verilen iki password bilgisi aynı olup olmadığını kontrol eden fonksiyon.
 string passwordCheck(int firstPassword, int secondPassword)
 {
     int counter = 0;
@@ -94,6 +104,7 @@ protected:
     string text;
 
 public:
+    // Yapıcı (Constructor) fonksiyon.
     Questions(string comText, string comAnswer)
     {
         text = comText;
@@ -106,16 +117,89 @@ public:
         return givenAnswer == answer;
     }
 
+    // Private erişim iznine sahip 'answer' değişkenine dışarıdan erişimi sağlayan fonksiyon.
     string getAnswer()
     {
         return answer;
     }
 
+    // Protected erişim iznine sahip 'text' değişkenine dışarıdan erişimi sağlayan fonksiyon.
     string getQuestion()
     {
         return text;
     }
 };
+
+class Lessons
+{
+protected:
+    string letterGrade;
+    int note;
+
+public:
+    string courseName;
+    int currentClass;
+
+    // ** Çok biçimlilik (Polymorphism) yapısı kullanıldı. **
+    // Constructor (Yapıcı) fonksiyon 1.
+    Lessons(string comCourseName)
+    {
+        courseName = comCourseName;
+        currentClass = 0;
+        letterGrade = "";
+        note = 0;
+    }
+
+    // Constructor (Yapıcı) fonksiyon 2.
+    Lessons(string comCourseName, int comCurrentClass)
+    {
+        courseName = comCourseName;
+        currentClass = comCurrentClass;
+        letterGrade = "";
+        note = 0;
+    }
+
+    // Sınav notunuza göre harf notunu hesaplayan fonksiyon.
+    bool toLetterGrade()
+    {
+        if (note >= 90)
+            letterGrade = "AA";
+        else if (note >= 85)
+            letterGrade = "BA";
+        else if (note >= 80)
+            letterGrade = "BB";
+        else if (note >= 75)
+            letterGrade = "CB";
+        else if (note >= 65)
+            letterGrade = "CC";
+        else if (note >= 58)
+            letterGrade = "DC";
+        else if (note >= 50)
+            letterGrade = "DD";
+        else if (note >= 40)
+            letterGrade = "FD";
+        else if (note < 40)
+            letterGrade = "FF";
+        else
+            return false;
+        return true;
+    }
+
+    // Protected erişim iznine sahip 'note' değişkenine dışarıdan atama yapılmasını sağlayan fonksiyon.
+    void setNote(int comNote) { note = comNote; }
+
+    // Protected erişim iznine sahip 'letterGrade' değişkenine dışarıdan erişimi sağlayan fonksiyon.
+    string getLetterGrade()
+    {
+        return letterGrade;
+    }
+
+    // Friend yapısı kullanıldı.
+    friend string isPassed(Lessons lesson);
+};
+
+// Gerekli Prototip
+string isPassed(Lessons lesson);
 
 class Quiz
 {
@@ -129,6 +213,7 @@ protected:
     int questionIndex;
 
 public:
+    // Constructor (Yapıcı) Fonksiyon.
     Quiz(vector<Questions> comQuestions)
     {
         questions = comQuestions;
@@ -247,7 +332,7 @@ public:
         printf("\n");
     }
 
-    // Kullanıcıya hangi soruya doğru, hangisine yanlış cevap verdiğini göstermeliyiz;
+    // Sınav bittikten sonra kullanıcıya hangi soruya doğru, hangisine yanlış cevap verdiğini göstermeliyiz;
     // ** Doğru ise bu fonksiyon çalışır.
     void isTrue(string answer)
     {
@@ -268,7 +353,7 @@ public:
         falseAnswers.push_back(result);
     }
 
-    // Sınav bitiminde bu fonksiyon çalışır, giriş yapan kullanıcının klasörüne o anki 'tarih-saat.txt' dosyası oluşturulur ve doğru-yanlış cevap tablosu dosyaya eklenir.
+    // Sınav bitiminde bu fonksiyon çalışır, giriş yapan kullanıcının klasörüne o anki 'tarih-saat.txt' dosyası oluşturulur ve notu, doğru-yanlış cevap tablosu dosyaya eklenir.
     void createQuizResults(string course)
     {
         string createdDate, createdTime, createdDateTime;
@@ -284,29 +369,67 @@ public:
         bool isCourseFolder = isPathExist(way);
 
         if (!isCourseFolder)
-        {
             int status = mkdir(way.c_str(), 0777);
-        }
-        string resultsWay = way + "/" + createdDateTime + ".txt";
 
-        ofstream dateTimeFile(resultsWay);
-        dateTimeFile << "Notunuz: " << score << endl;
-        dateTimeFile << "\nDogru Cevaplariniz:" << endl;
-        for (int i = 0; i < totalTrueAnswer; i++)
+        for (int i = 1; i <= 2; i++)
         {
-            dateTimeFile << " > " << trueAnswers[i] << endl;
+            string resultsWay = "";
+            bool condition = false, isRealResult = false;
+            if (i == 1)
+            {
+                resultsWay = way + "/realResult.txt";
+
+                bool isRealResultFile = isPathExist(resultsWay);
+
+                if (!isRealResultFile)
+                {
+                    condition = true;
+                    isRealResult = true;
+                }
+            }
+            else
+            {
+                resultsWay = way + "/" + createdDateTime + ".txt";
+                condition = true;
+            }
+            if (condition)
+            {
+                ofstream resultsFile(resultsWay);
+
+                if (isRealResult)
+                {
+                    resultsFile << course << " dersinden aldiginiz orjinal notunuzdur." << endl;
+                }
+                else
+                {
+                    resultsFile << course << " dersinden aldiginiz deneme notunuzdur. Bu notun bir hukmu yoktur!" << endl;
+                }
+
+                Lessons lesson = Lessons(course);
+                lesson.setNote(score);
+                bool isAssign = lesson.toLetterGrade();
+
+                resultsFile << "Notunuz: " << score << endl;
+                resultsFile << "Harf Notunuz: " << lesson.getLetterGrade() << endl;
+                resultsFile << "\nDogru Cevaplariniz:" << endl;
+                for (int i = 0; i < totalTrueAnswer; i++)
+                {
+                    resultsFile << " > " << trueAnswers[i] << endl;
+                }
+                if (totalTrueAnswer == 0)
+                    resultsFile << " > Dogru cevabiniz yok." << endl;
+                resultsFile << "\n";
+                resultsFile << "Yanlis Cevaplariniz:" << endl;
+                for (int j = 0; j < totalFalseAnswer; j++)
+                {
+                    resultsFile << " > " << falseAnswers[j] << endl;
+                }
+                if (totalFalseAnswer == 0)
+                    resultsFile << " > Yanlis cevabiniz yok." << endl;
+                resultsFile << "\nSonuc: " << isPassed(lesson) << endl;
+                resultsFile.close();
+            }
         }
-        if (totalTrueAnswer == 0)
-            dateTimeFile << " > Dogru cevabiniz yok." << endl;
-        dateTimeFile << "\n";
-        dateTimeFile << "Yanlis Cevaplariniz:" << endl;
-        for (int j = 0; j < totalFalseAnswer; j++)
-        {
-            dateTimeFile << " > " << falseAnswers[j] << endl;
-        }
-        if (totalFalseAnswer == 0)
-            dateTimeFile << " > Yanlis cevabiniz yok." << endl;
-        dateTimeFile.close();
     }
 };
 
@@ -320,6 +443,7 @@ public:
     People();
 };
 
+// Scope resolution operator yapısı kullanıldı.
 People::People()
 {
     name = "";
@@ -327,6 +451,7 @@ People::People()
     gender = "";
     age = 0;
 }
+
 class Users : public People
 {
 protected:
@@ -336,6 +461,7 @@ protected:
 public:
     string title;
 
+    // Constructor (Yapıcı) fonksiyon.
     Users()
     {
         name = "";
@@ -349,6 +475,7 @@ public:
         passwordAgain = 0;
     }
 
+    // Virtual yapısı kullanıldı.
     // Ana sınıfın signUp() fonksiyonudur kaydolma işlemleri türetilmiş sınıfların signUp() fonksiyonunda yapılacaktır.
     virtual bool signUp()
     {
@@ -365,6 +492,7 @@ public:
         return false;
     }
 
+    // Kullanıcı adı ve parola istenir, değerler doğru ise uygulamaya girişi sağlanır.
     bool signIn()
     {
         string localUsername = "";
@@ -435,28 +563,7 @@ public:
     }
 };
 
-class Lessons
-{
-protected:
-    string letterGrade;
-    float average;
-    int note;
-
-public:
-    string courseName;
-    int currentClass;
-    friend string isPassed(Lessons lessons);
-
-    Lessons(string comCourseName, int comCurrentClass)
-    {
-        courseName = comCourseName;
-        currentClass = comCurrentClass;
-        letterGrade = "";
-        average = 0.0;
-        note = 0;
-    }
-};
-
+// Prototip (bildirim) yapıldı.
 vector<Lessons> createLessonObjects(int whichGrader, string role);
 
 class Students : public Users
@@ -469,10 +576,10 @@ protected:
 public:
     Students();
 
-    // Kullanıcıdan gerekli bilgiler istenir, gelen değer ile kullanıcı oluşturulur ve bilgiler profile.txt dosyasına kaydedilir.
+    // Kullanıcıdan gerekli bilgiler istenir, gelen değer ile kullanıcı oluşturulur ve  bu bilgiler 'profile.txt' dosyasına kaydedilir.
     bool signUp()
     {
-        cout << "Sistemimiz asagida listelenmis bolumleri kapsamaktadir," << endl;
+        cout << "\nSistemimiz asagida listelenmis bolumleri kapsamaktadir," << endl;
         cout << "1.) Bilgisayar Muhendisligi\n2.) Makine Muhendisligi" << endl;
         string branch = "";
         while (true)
@@ -531,6 +638,8 @@ public:
         username = trim(username);
         username = toLowercase(username);
 
+        cout << "\nSistemimiz sadece rakamlardan olusan parolaya izin vermektedir!" << endl;
+
         cout << "Parola: ";
         cin >> password;
 
@@ -556,6 +665,7 @@ public:
 
         string path = usersWay + "/" + username;
 
+        // try-catch yapısı kullanıldı.
         try
         {
             int status = mkdir(path.c_str(), 0777);
@@ -605,6 +715,7 @@ public:
     }
 };
 
+// Scope resolution operator kullanılarak Students() yapıcı fonksiyonunun yapacağı işlemler belirtildi.
 Students::Students()
 {
     name = "";
@@ -627,6 +738,7 @@ private:
     int passwordForTeacherByClass;
 
 public:
+    // Constructor (Yapıcı) fonksiyon.
     Teachers()
     {
         passwordForTeacherByClass = 112233;
@@ -641,12 +753,13 @@ public:
         passwordAgain = 0;
     }
 
+    // Private erişim iznine sahip 'passwordForTeacherByClass' değişkenine dışarıdan erişimi sağlayan fonksiyon.
     int getPasswordForTeacher()
     {
         return passwordForTeacherByClass;
     }
 
-    // Kullanıcıdan gerekli bilgiler istenir, gelen değer ile kullanıcı oluşturulur ve bilgiler profile.txt dosyasına kaydedilir.
+    // Kullanıcıdan gerekli bilgiler istenir, gelen değer ile kullanıcı oluşturulur ve bu bilgiler 'profile.txt' dosyasına kaydedilir.
     bool signUp()
     {
         cout << "Sistemimiz asagida listelenmis branslari kapsamaktadir," << endl;
@@ -703,6 +816,8 @@ public:
         cin >> username;
         username = trim(username);
         username = toLowercase(username);
+
+        cout << "\nSistemimiz sadece rakamlardan olusan parolaya izin vermektedir!" << endl;
 
         cout << "Parola: ";
         cin >> password;
@@ -771,18 +886,18 @@ public:
     }
 };
 
-string isPassed(Lessons lessons)
+// Harf notuna göre 'gecti', 'kosullu gecti' yada 'kaldi' sonuçlarından birini döndüren fonksiyon.
+string isPassed(Lessons lesson)
 {
-    if (lessons.letterGrade == "FF")
+    if (lesson.letterGrade == "FF")
         return "kaldi";
-    else if (lessons.letterGrade == "CD" || lessons.letterGrade == "DC" || lessons.letterGrade == "DD")
-    {
-        // SONRA HESAPLANACAK!
-    }
+    else if (lesson.letterGrade == "DC" || lesson.letterGrade == "DD" || lesson.letterGrade == "FD")
+        return "kosullu gecti";
     return "gecti";
 }
 
-// Parametre olarak verilen sınıf numarasına göre o sınıfın derslerini döndüren fonksiyon.
+// ** Çok biçimlilik (Polymorphism) yapısı kullanıldı. **
+// Parametre olarak verilen sınıf ve branş bilgisine göre o sınıfın derslerini döndüren fonksiyon.
 vector<string> findLessons(int whichGrader, string branch)
 {
     int counter = 0;
@@ -964,13 +1079,95 @@ void quizStart(string course)
     }
 }
 
-// Menünün oluşturulduğu bölüm
+// Parametre olarak gönderilen dersin istenilen sınav sonucunu ekrana yazdıran fonksiyon. 
+bool showQuizResult(string course)
+{
+    string way = get_current_dir() + "/users/" + globalUsername + "/" + course;
+
+    cout << "\n1.) Orjinal/Gercek Notu Goruntule\n2.) Tarih Ve Saate Gore Deneme Notunu Goruntule\n3.) Geri Git" << endl;
+
+    int choice = 0;
+    while (true)
+    {
+        cout << "Birini seciniz: ";
+        cin >> choice;
+        if (choice == 1)
+        {
+            string realResultWay = way + "/realResult.txt";
+            bool isRealResultFile = isPathExist(realResultWay);
+
+            if (isRealResultFile)
+            {
+                string fileContent = "";
+                ifstream readRealResultFile(realResultWay);
+                while (getline(readRealResultFile, fileContent))
+                {
+                    cout << fileContent << endl;
+                }
+                readRealResultFile.close();
+                return true;
+            }
+            else
+            {
+                cout << "Sinav olmadiginiz icin sinav sonucunuz yok!" << endl;
+                return false;
+            }
+        }
+        else if (choice == 2)
+        {
+            string quizDate = "", quizTime = "";
+            while (true)
+            {
+                cout << "\nGeri donmek icin 'geri' veya 'g' yaziniz\n" << endl;
+                cout << "Sinav oldugunuz tarihi sirasiyla Gun_Ay_Yil biciminde giriniz.\nTarih: ";
+                cin >> quizDate;
+
+                if (quizDate == "geri" || quizDate == "g")
+                {
+                    cout << "\n1.) Orjinal/Gercek Notu Goruntule\n2.) Tarih Ve Saate Gore Deneme Notunu Goruntule\n3.) Geri Git" << endl;
+                    break;
+                }
+
+                cout << "Sinav oldugunuz saati sirasiyla Saat_Dakika_Saniye biciminde giriniz.\nSaat: ";
+                cin >> quizTime;
+
+                string quizDateTime = quizDate + "_" + quizTime;
+                string dateTimeResultWay = way + "/" + quizDateTime + ".txt";
+                bool isDateTimeFile = isPathExist(dateTimeResultWay);
+
+                if (isDateTimeFile)
+                {
+                    string fileContent = "";
+                    ifstream readDateTimeFile(dateTimeResultWay);
+                    while (getline(readDateTimeFile, fileContent))
+                    {
+                        cout << fileContent << endl;
+                    }
+                    readDateTimeFile.close();
+                    return true;
+                }
+                else
+                {
+                    cout << "Yanlis deger/degerler girdiniz! Lutfen tekrar deneyiniz." << endl;
+                    continue;
+                }
+            }
+        }
+        else if (choice == 3)
+            return false;
+        else
+            cout << "Yanlis deger girdiniz! Lutfen tekrar deneyiniz." << endl;
+    }
+    return false;
+}
+
+// Uygulamanın menüsünü oluşturan fonksiyon.
 void createMenu()
 {
     while (true)
     {
         int selectedAction = 0;
-        cout << "\n1.) Kayit Ol\n2.) Giris Yap\n3.) Cikis\nTercihiniz: ";
+        cout << "\n1.) Kayit Ol\n2.) Giris Yap\n3.) Cikis Yap\nTercihiniz: ";
         cin >> selectedAction;
 
         if (selectedAction == 1)
@@ -1120,15 +1317,20 @@ void createMenu()
                         else
                             cout << "Yanlis deger girdiniz! Lutfen tekrar deneyiniz." << endl;
                     }
+                    if (userPreference == 3)
+                    {
+                        cout << string(40, '*') << " Uygulama Sonlandirildi " << string(36, '*') << endl;
+                        break;
+                    }
                 }
                 else
                 {
                     while (true)
                     {
-                        cout << "\n1.) Sinav Ol\n2.) Ana Menü\n3.)Cikis Yap\nTercihiniz: ";
+                        cout << "\n1.) Sinav Ol\n2.) Sonucu Goruntule\n3.) Ana Menü\n4.) Cikis Yap\nTercihiniz: ";
                         cin >> userPreference;
 
-                        if (userPreference == 1)
+                        if (userPreference == 1 || userPreference == 2)
                         {
                             printf("\nAsagida dersleriniz listelenmistir,\n");
                             profileContent = "";
@@ -1159,7 +1361,11 @@ void createMenu()
                             string course = "";
                             while (true)
                             {
-                                cout << "Sinav olmak istediginiz dersin numarasini giriniz: ";
+                                if (userPreference == 1)
+                                    cout << "Sinav olmak istediginiz dersin numarasini giriniz: ";
+                                else
+                                    cout << "Sonucunu goruntulemek istediginiz dersin numarasini giriniz: ";
+
                                 cin >> courseNumber;
                                 if (courseNumber > counter || courseNumber <= 0)
                                 {
@@ -1197,24 +1403,32 @@ void createMenu()
                                 readUserProfile.close();
                                 break;
                             }
-                            quizStart(course);
+                            if (userPreference == 1)
+                                quizStart(course);
+                            else
+                            {
+                                bool isShowQuizResult=showQuizResult(course);
+                                if (!isShowQuizResult)
+                                    continue;
+                                
+                            }
                         }
-                        else if (userPreference == 2 || userPreference == 3)
+                        else if (userPreference == 3 || userPreference == 4)
                             break;
                         else
                             cout << "Yanlis deger girdiniz! Lutfen tekrar deneyiniz." << endl;
                     }
-                }
-                if (userPreference == 3)
-                {
-                    cout << string(50, '*') << " Uygulama Sonlandirildi " << string(50, '*') << endl;
-                    break;
+                    if (userPreference == 4)
+                    {
+                        cout << string(40, '*') << " Uygulama Sonlandirildi " << string(36, '*') << endl;
+                        break;
+                    }
                 }
             }
         }
         else if (selectedAction == 3)
         {
-            cout << string(50, '*') << " Uygulama Sonlandirildi " << string(50, '*') << endl;
+            cout << string(40, '*') << " Uygulama Sonlandirildi " << string(36, '*') << endl;
             break;
         }
         else
@@ -1224,7 +1438,7 @@ void createMenu()
 
 int main()
 {
-    cout << string(50, '*') << " Sinav Uygulamasi " << string(50, '*') << endl;
+    cout << string(40, '*') << " Sinav Uygulamasi " << string(42, '*') << endl;
     createMenu();
     return 0;
 }
