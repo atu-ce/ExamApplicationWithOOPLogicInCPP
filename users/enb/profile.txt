@@ -1,0 +1,11 @@
+Kullanici Adi: enb
+Parola: 123
+Isim: esma
+Soyisim: nur
+Cinsiyet: kadin
+Yas: 20
+Unvan: Ogrenci
+Bolum: BM
+Sinif: 1. Sinif
+Toplam Ders Sayisi: 8
+Dersleri: Matematik 1, Matematik 2, Fizik 1, Fizik 2, Bilgisayar Muhendisligine Giris, Bilgisayar Programlamaya Giris, Ayrik Matematik, Nesne Yonelimli Programlama, 

@@ -216,6 +216,7 @@ protected:
     int questionIndex;
 
 public:
+    int queryForGetline;
     // Constructor (Yapıcı) Fonksiyon.
     Quiz(vector<Questions> comQuestions)
     {
@@ -226,6 +227,7 @@ public:
         totalFalseAnswer = 0;
         trueAnswers = {};
         falseAnswers = {};
+        queryForGetline = 0;
     }
 
     // Bu fonksiyonun amacı, o anki 'questionIndex'in değerine karşılık gelen  question objesini göndermek.
@@ -237,13 +239,18 @@ public:
     // Bu fonksiyon, gelen question objesini ekrana yazdırır.
     void disPlayQuestion(string course)
     {
+        queryForGetline++;
         Questions question = getQuestion();
         string answer = "";
 
-        string bug = "";
-        getline(cin, bug); // getline() fonksiyonunun bir bug'ından dolayı bu satır yazılmıştır.
+        if (!(queryForGetline > 1))
+        {
+            string bug = "";
+            getline(cin, bug); // getline() fonksiyonunun bir bug'ından dolayı bu satır yazılmıştır.
+        }
         cout << "Soru " << (questionIndex + 1) << ": " << question.getQuestion() << "?\nCevap: ";
         getline(cin, answer);
+        // cin >> answer;
         answer = toLowercase(answer);
         answer = trim(answer);
         guess(answer);

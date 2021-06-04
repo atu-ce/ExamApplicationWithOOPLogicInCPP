@@ -1,0 +1,2 @@
+oop nedir: her islevin nesneler olarak soyutlandigi bir programlama yaklasimidir
+erisim izinleri nelerdir: private, protected, public

@@ -1,0 +1,15 @@
+
+**************************************** Sinav Sonucu **********************************************
+Nesne Yonelimli Programlama dersinden aldiginiz orjinal notunuzdur.
+Notunuz: 50
+Harf Notunuz: DD
+
+Dogru Cevaplariniz:
+ > 2. soru (private, protected, public).
+
+Yanlis Cevaplariniz:
+ > 1. soru (kalşl), dogru cevap: her islevin nesneler olarak soyutlandigi bir programlama yaklasimidir.
+
+Sonuc: kosullu gecti
+
+****************************************************************************************************
