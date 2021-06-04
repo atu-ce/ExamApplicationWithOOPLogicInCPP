@@ -374,66 +374,52 @@ public:
         if (!isCourseFolder)
             int status = mkdir(way.c_str(), 0777);
 
-        for (int i = 1; i <= 2; i++)
+        string resultsWay = "";
+        bool isRealResult = false;
+
+        resultsWay = way + "/realResult.txt";
+        bool isRealResultFile = isPathExist(resultsWay);
+
+        if (!isRealResultFile)
+            isRealResult = true;
+        else
+            resultsWay = way + "/" + createdDateTime + ".txt";
+
+        ofstream resultsFile(resultsWay);
+
+        resultsFile << "\n"
+                    << string(40, '*') << " Sinav Sonucu " << string(46, '*') << endl;
+
+        if (isRealResult)
+            resultsFile << course << " dersinden aldiginiz orjinal notunuzdur." << endl;
+        else
+            resultsFile << course << " dersinden aldiginiz deneme notunuzdur. Bu notun bir hukmu yoktur!" << endl;
+
+        Lessons lesson = Lessons(course);
+        lesson.setNote(score);
+        bool isAssign = lesson.toLetterGrade();
+
+        resultsFile << "Notunuz: " << score << endl;
+        resultsFile << "Harf Notunuz: " << lesson.getLetterGrade() << endl;
+        resultsFile << "\nDogru Cevaplariniz:" << endl;
+        for (int i = 0; i < totalTrueAnswer; i++)
         {
-            string resultsWay = "";
-            bool condition = false, isRealResult = false;
-            if (i == 1)
-            {
-                resultsWay = way + "/realResult.txt";
-
-                bool isRealResultFile = isPathExist(resultsWay);
-
-                if (!isRealResultFile)
-                {
-                    condition = true;
-                    isRealResult = true;
-                }
-            }
-            else
-            {
-                resultsWay = way + "/" + createdDateTime + ".txt";
-                condition = true;
-            }
-            if (condition)
-            {
-                ofstream resultsFile(resultsWay);
-
-                resultsFile << "\n"
-                            << string(40, '*') << " Sinav Sonucu " << string(46, '*') << endl;
-
-                if (isRealResult)
-                    resultsFile << course << " dersinden aldiginiz orjinal notunuzdur." << endl;
-                else
-                    resultsFile << course << " dersinden aldiginiz deneme notunuzdur. Bu notun bir hukmu yoktur!" << endl;
-
-                Lessons lesson = Lessons(course);
-                lesson.setNote(score);
-                bool isAssign = lesson.toLetterGrade();
-
-                resultsFile << "Notunuz: " << score << endl;
-                resultsFile << "Harf Notunuz: " << lesson.getLetterGrade() << endl;
-                resultsFile << "\nDogru Cevaplariniz:" << endl;
-                for (int i = 0; i < totalTrueAnswer; i++)
-                {
-                    resultsFile << " > " << trueAnswers[i] << endl;
-                }
-                if (totalTrueAnswer == 0)
-                    resultsFile << " > Dogru cevabiniz yok." << endl;
-                resultsFile << "\n";
-                resultsFile << "Yanlis Cevaplariniz:" << endl;
-                for (int j = 0; j < totalFalseAnswer; j++)
-                {
-                    resultsFile << " > " << falseAnswers[j] << endl;
-                }
-                if (totalFalseAnswer == 0)
-                    resultsFile << " > Yanlis cevabiniz yok." << endl;
-                resultsFile << "\nSonuc: " << isPassed(lesson) << endl;
-                resultsFile << "\n"
-                            << string(100, '*') << endl;
-                resultsFile.close();
-            }
+            resultsFile << " > " << trueAnswers[i] << endl;
         }
+        if (totalTrueAnswer == 0)
+            resultsFile << " > Dogru cevabiniz yok." << endl;
+        resultsFile << "\n";
+        resultsFile << "Yanlis Cevaplariniz:" << endl;
+        for (int j = 0; j < totalFalseAnswer; j++)
+        {
+            resultsFile << " > " << falseAnswers[j] << endl;
+        }
+        if (totalFalseAnswer == 0)
+            resultsFile << " > Yanlis cevabiniz yok." << endl;
+        resultsFile << "\nSonuc: " << isPassed(lesson) << endl;
+        resultsFile << "\n"
+                    << string(100, '*') << endl;
+        resultsFile.close();
     }
 };
 
